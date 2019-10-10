@@ -1,0 +1,43 @@
+{
+  "name": "rise-data-counter",
+  "version": "1.0.0",
+  "description": "Rise data counter component",
+  "scripts": {
+    "prebuild": "eslint .",
+    "build": "polymer build && ./node_modules/rise-common-component/scripts/extract-source.sh rise-data-counter",
+    "pretty": "eslint . --fix",
+    "test": "eslint . && polymer test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Rise-Vision/rise-data-counter.git"
+  },
+  "keywords": [
+    "Rise",
+    "Vision",
+    "Digital",
+    "Signage",
+    "Count Up",
+    "Countdown"
+  ],
+  "author": "Rise Vision",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/Rise-Vision/rise-data-counter/issues"
+  },
+  "homepage": "https://github.com/Rise-Vision/rise-data-counter/#readme",
+  "dependencies": {
+    "@polymer/polymer": "3.1.0",
+    "@webcomponents/webcomponentsjs": "^2.1.3",
+    "rise-common-component": "git://github.com/Rise-Vision/rise-common-component.git#v1.2.1"
+  },
+  "devDependencies": {
+    "@polymer/test-fixture": "^4.0.2",
+    "chai": "^4.2.0",
+    "eslint": "^5.16.0",
+    "eslint-utils": ">=1.4.1",
+    "mocha": "^5.2.0",
+    "sinon": "^7.3.2",
+    "wct-mocha": "^1.0.0"
+  }
+}
