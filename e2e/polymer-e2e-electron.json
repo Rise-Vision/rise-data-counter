@@ -1,31 +1,31 @@
 {
-  entrypoint: "e2e/rise-data-counter-electron.html",
-  sources: [
+  "entrypoint": "e2e/rise-data-counter-electron.html",
+  "sources": [
     "e2e/**/*"
   ],
-  extraDependencies: [
+  "extraDependencies": [
     "node_modules/@polymer/polymer/**",
     "node_modules/@webcomponents/webcomponentsjs/**"
   ],
-  builds: [
+  "builds": [
     {
-      name: "base",
-      preset: "es5-bundled",
-      addServiceWorker: false,
-      html: {
-        minify: true
+      "name": "base",
+      "preset": "es5-bundled",
+      "addServiceWorker": false,
+      "html": {
+        "minify": true
       },
-      css: {
-        minify: true
+      "css": {
+        "minify": true
       },
-      js: {
-        minify: true
+      "js": {
+        "minify": true
       },
-      bundle: {
-        stripComments: true
+      "bundle": {
+        "stripComments": true
       }
     }
   ],
-  moduleResolution: "node",
-  npm: true
+  "moduleResolution": "node",
+  "npm": true
 }
