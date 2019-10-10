@@ -1,0 +1,48 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <script src="https://widgets.risevision.com/scripts/primus-local-messaging.js"></script>
+
+  <script src="../node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
+  <script src="../node_modules/@webcomponents/webcomponentsjs/custom-elements-es5-adapter.js"></script>
+  <script type="module">
+    // this and the following block are needed at build time to force the creation of the shared bundle script
+    import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
+  </script>
+  <script type="module">
+    import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
+  </script>
+  <script src="https://widgets.risevision.com/__STAGE__/common/config-test.min.js"></script>
+  <script src="https://widgets.risevision.com/__STAGE__/common/common-template.min.js"></script>
+  <script src="https://widgets.risevision.com/staging/components/rise-data-counter/__VERSION__/rise-data-counter.js"></script>
+  <script>
+    if (document.domain.indexOf("localhost") === -1) {
+      try {
+        document.domain = "risevision.com";
+      } catch (err) {
+        // can't set document.domain, risevision.com not an accepted suffix of current document domain
+        console.log("document.domain can't be set", err);
+      }
+    }
+  </script>
+</head>
+<body>
+<rise-data-counter id="rise-data-counter-01">
+</rise-data-counter>
+
+<script>
+  function configureComponents() {
+    console.log('Rise components ready');
+  }
+
+  window.addEventListener( "rise-components-ready", configureComponents );
+</script>
+<script>
+  RisePlayerConfiguration.configure();
+</script>
+</body>
+</html>
