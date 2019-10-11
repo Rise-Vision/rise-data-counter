@@ -3,3 +3,4 @@ dist/
 node_modules/
 demo/build/**
 demo/node_modules/**
+coverage/

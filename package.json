@@ -34,10 +34,12 @@
   "devDependencies": {
     "@polymer/test-fixture": "^4.0.2",
     "chai": "^4.2.0",
+    "coveralls": "3.0.6",
     "eslint": "^5.16.0",
     "eslint-utils": ">=1.4.1",
     "mocha": "^5.2.0",
     "sinon": "^7.3.2",
+    "wct-istanbul": "^0.14.3",
     "wct-mocha": "^1.0.0"
   }
 }
