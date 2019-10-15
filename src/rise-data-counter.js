@@ -50,7 +50,7 @@ export default class RiseDataCounter extends RiseElement {
   // a comma-separated list of one or more dependencies.
   static get observers() {
     return [
-      "_reset(type, date, time, completion, refresh)"
+      "_reset(date, time, completion)"
     ];
   }
 
