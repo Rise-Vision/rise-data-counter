@@ -33,13 +33,17 @@
 
 <body>
 
-<rise-data-counter id="rise-data-counter-01">
+<rise-data-counter id="rise-data-counter-01" type="down" refresh="10" date="2019-10-29">
 </rise-data-counter>
 
 <script>
   function configureComponents() {
     const riseDataCounter01 = document.querySelector('#rise-data-counter-01');
     console.log('Rise components ready');
+
+    riseDataCounter01.addEventListener( "data-update", evt => {
+      console.log( "data-update", evt.detail );
+    } );
 
     // Uncomment if testing directly in browser
     // [ riseDataCounter01 ].forEach( el => RisePlayerConfiguration.Helpers.sendStartEvent( el ) );
