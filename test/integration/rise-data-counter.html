@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+
+  <title>rise-data-counter test</title>
+
+  <script src="../../node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
+  <script src="../../node_modules/@polymer/test-fixture/test-fixture.js"></script>
+  <script src="../../node_modules/mocha/mocha.js"></script>
+  <script src="../../node_modules/chai/chai.js"></script>
+  <script src="../../node_modules/wct-mocha/wct-mocha.js"></script>
+  <script src="../../node_modules/sinon/pkg/sinon.js"></script>
+
+  <script type="text/javascript">
+    RisePlayerConfiguration = {
+      isConfigured: () => true
+    };
+  </script>
+
+  <script type="module" src="../../src/rise-data-counter.js"></script>
+</head>
+<body>
+  <test-fixture id="test-date-block">
+    <template>
+      <rise-data-counter type="down" date="2019-10-29" refresh="60"></rise-data-counter>
+    </template>
+  </test-fixture>
+
+  <test-fixture id="test-time-block">
+    <template>
+      <rise-data-counter type="down" time="17:00" refresh="60"></rise-data-counter>
+    </template>
+  </test-fixture>
+
+  <script type="module">
+    suite("rise-data-counter", () => {
+      let sandbox = sinon.createSandbox();
+      let elementDate, elementTime, clock;
+
+      setup(() => {
+        RisePlayerConfiguration.Logger = {
+          info: () => {},
+          warning: () => {},
+          error: () => {}
+        };
+
+        RisePlayerConfiguration.isPreview = () => {
+          return false;
+        };
+
+        clock = sinon.useFakeTimers();
+
+        elementDate = fixture("test-date-block");
+        elementTime = fixture("test-time-block");
+      });
+
+      teardown(()=>{
+        sandbox.restore();
+        clock.restore();
+      });
+
+      suite( "data event", () => {
+        test( "should receive data events per refresh", ( done ) => {
+          const handler = function( evt ) {
+            assert.isString( evt.detail );
+
+            dataCount += 1;
+
+            if (dataCount === 2) {
+              done();
+            }
+
+          };
+
+          let dataCount = 0;
+
+          elementDate.addEventListener( "data-update", handler );
+          elementDate.dispatchEvent( new CustomEvent( "start" ) );
+
+          clock.tick(60000);
+          clock.tick(60000);
+        } );
+      } );
+
+      suite( "attribute value change", () => {
+        setup( () => {
+          sandbox.spy( elementDate, "_reset" );
+          sandbox.spy( elementTime, "_reset" );
+        } );
+
+        test( "should reset from date change", ( done ) => {
+          const handler = function( evt ) {
+            assert.isString( evt.detail );
+
+            done();
+          };
+
+          elementDate.addEventListener( "data-update", handler );
+          elementDate.dispatchEvent( new CustomEvent( "start" ) );
+
+          elementDate.setAttribute( "date", "2020-01-01" );
+
+          assert.isTrue( elementDate._reset.calledOnce );
+          clock.tick(60000);
+        } );
+
+        test( "should call reset from time change", ( done ) => {
+          const handler = function( evt ) {
+            assert.isString( evt.detail );
+
+            done();
+          };
+
+          elementTime.addEventListener( "data-update", handler );
+          elementTime.dispatchEvent( new CustomEvent( "start" ) );
+
+          elementTime.setAttribute( "time", "20:00" );
+
+          assert.isTrue( elementTime._reset.calledOnce );
+          clock.tick(60000);
+        } );
+
+        test( "should call reset from completion change", ( done ) => {
+          const handler = function( evt ) {
+            assert.isString( evt.detail );
+
+            done();
+          };
+
+          elementTime.addEventListener( "data-update", handler );
+          elementTime.dispatchEvent( new CustomEvent( "start" ) );
+
+          elementTime.setAttribute( "completion", "Test!" );
+
+          assert.isTrue( elementTime._reset.calledOnce );
+          clock.tick(60000);
+        } );
+
+      } );
+    });
+  </script>
+</body>
+</html>

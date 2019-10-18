@@ -30,10 +30,33 @@
 
     <script type="module">
       suite("rise-data-counter", () => {
-        let element;
+        let sandbox = sinon.createSandbox();
+        let element, clock, riseElement;
 
         setup(() => {
+          RisePlayerConfiguration.Logger = {
+            info: () => {},
+            warning: () => {},
+            error: sinon.spy()
+          };
+
+          RisePlayerConfiguration.isPreview = () => {
+            return false;
+          };
+
+          clock = sinon.useFakeTimers();
+
           element = fixture("test-block");
+
+          riseElement = element.__proto__.__proto__;
+
+          sandbox.spy(riseElement, '_sendEvent');
+          sandbox.stub(riseElement, '_setUptimeError');
+        });
+
+        teardown(()=>{
+          sandbox.restore();
+          clock.restore();
         });
 
         suite("properties", () => {
@@ -41,6 +64,262 @@
             assert.equal(element.type, "down");
           });
         });
+
+        suite("ready", () => {
+          let stub;
+
+          setup(() => {
+            stub = sandbox.stub(window, "addEventListener");
+          });
+
+          test("should listen for rise-components-ready and call init", () => {
+            RisePlayerConfiguration.isConfigured = () => false;
+            element.ready();
+
+            assert.isTrue(stub.calledWith('rise-components-ready'));
+          });
+
+          test("should call _init() if RisePlayerConfiguration is configured", () => {
+            RisePlayerConfiguration.isConfigured = () => true;
+            sandbox.stub(element, '_init');
+
+            element.ready();
+
+            assert.isTrue(element._init.calledOnce);
+            assert.isFalse(stub.calledOnce);
+          });
+
+          test("should setup handlers for viewer events", () => {
+            sandbox.stub(element, "_reset");
+            sandbox.stub(element, "_stop");
+
+            element.dispatchEvent( new CustomEvent( "rise-presentation-play" ));
+            element.dispatchEvent( new CustomEvent( "rise-presentation-stop" ));
+
+            assert.isTrue(element._reset.calledOnce);
+            assert.isTrue(element._stop.calledOnce);
+          });
+
+        });
+
+        suite( "_isValidType", () => {
+
+          test( "should return true if 'type' attribute is 'down'", () => {
+            assert.isTrue( element._isValidType( "down" ) );
+          } );
+
+          test( "should return true if 'type' attribute is 'up'", () => {
+            assert.isTrue( element._isValidType( "up" ) );
+          } );
+
+          test( "should return false when invalid", () => {
+            assert.isFalse( element._isValidType( "test" ) );
+          } );
+
+        } );
+
+        suite( "_isValidDate", () => {
+
+          test( "should return true if 'date' has correct strict format YYYY-MM-DD", () => {
+            assert.isTrue( element._isValidDate( "2019-10-29" ) );
+          } );
+
+          test( "should return false if 'date' has incorrect strict format", () => {
+            assert.isFalse( element._isValidDate( "2019-29-10" ) );
+            assert.isFalse( element._isValidDate( "29-10-2019" ) );
+            assert.isFalse( element._isValidDate( "2019-10-29T15:18:06.960Z" ) );
+          } );
+
+        } );
+
+        suite( "_isValidTime", () => {
+
+          test( "should return true if 'time' has correct strict format HH:mm", () => {
+            assert.isTrue( element._isValidTime( "16:20" ) );
+          } );
+
+          test( "should return false if 'time' has incorrect strict format", () => {
+            assert.isFalse( element._isValidTime( "16-20" ) );
+            assert.isFalse( element._isValidTime( "16.20" ) );
+            assert.isFalse( element._isValidDate( "16:20:06" ) );
+            assert.isFalse( element._isValidDate( "2019-10-29T15:18:06.960Z" ) );
+          } );
+
+        } );
+
+        suite( "_hasValidFormat", () => {
+
+          test( "should return false if no 'date' or 'time' value", () => {
+            assert.isFalse( element._hasValidFormat() );
+          } );
+
+          test( "should return false if 'date' configured with invalid format", () => {
+            element.date = "test";
+            assert.isFalse( element._hasValidFormat() );
+          } );
+
+          test( "should return false if 'time' configured with invalid format", () => {
+            element.time = "test";
+            assert.isFalse( element._hasValidFormat() );
+          } );
+
+          test( "should return true if 'date' configured with valid format", () => {
+            element.date = "2019-10-29";
+            assert.isTrue( element._hasValidFormat() );
+          } );
+
+          test( "should return true if 'time' configured with valid format", () => {
+            element.time = "16:20";
+            assert.isTrue( element._hasValidFormat() );
+          } );
+
+        } );
+
+        suite( "_sendCounterEvent", () => {
+          test( "should process 'data-error' event and set uptime correctly", () => {
+            element._sendCounterEvent( 'data-error', 'test' );
+
+            assert.isTrue( riseElement._sendEvent.calledWith( 'data-error', 'test' ) );
+            assert.isTrue( riseElement._setUptimeError.calledWith( true ) );
+          } );
+
+          test( "should process 'data-update' event and set uptime correctly", () => {
+            element._sendCounterEvent( 'data-update', 'test' );
+
+            assert.isTrue( riseElement._sendEvent.calledWith( 'data-update', 'test' ) );
+            assert.isTrue( riseElement._setUptimeError.calledWith( false ) );
+          } );
+
+        } );
+
+        suite( "_runTimer", () => {
+          test( "should call '_processCount()' after 1 second", () => {
+            sandbox.stub( element, "_processCount" );
+
+            element._runTimer( 1 );
+
+            assert.isFalse( element._processCount.calledOnce );
+
+            clock.tick( 1000 );
+
+            assert.isTrue( element._processCount.calledOnce );
+          } );
+
+          test( "should call '_processCount()' after 1 minute", () => {
+            sandbox.stub( element, "_processCount" );
+
+            element._runTimer( 60 );
+
+            clock.tick( 30000 );
+
+            assert.isFalse( element._processCount.calledOnce );
+
+            clock.tick( 30000 );
+
+            assert.isTrue( element._processCount.calledOnce );
+          } );
+        } );
+
+        suite( "_reset", () => {
+          setup( () => {
+            sandbox.stub( element, "_stop" );
+            sandbox.stub( element, "_start" );
+          } );
+
+          test( "should not execute reset when an initial start still pending", () => {
+            element._reset();
+
+            assert.isFalse( element._stop.calledOnce );
+            assert.isFalse( element._start.calledOnce );
+          } );
+
+          test( "should execute reset when not the initial start", () => {
+            element._initialStart = false;
+            element._reset();
+
+            assert.isTrue( element._stop.calledOnce );
+            assert.isTrue( element._start.calledOnce );
+          } );
+        } );
+
+        suite( "_start", () => {
+          setup( () => {
+            sandbox.stub( element, "_runTimer" );
+          } );
+
+          test( "should call _runTimer() when type and date or time formats are valid", () => {
+            element.type = "down";
+            element.date = "2019-10-29";
+            element._start();
+
+            assert.isTrue( element._runTimer.calledOnce );
+          } );
+
+          test( "should not call _runTimer() when type is invalid", () => {
+            element.type = "test";
+            element.date = "2019-10-29";
+            element._start();
+
+            assert.isFalse( element._runTimer.calledOnce );
+          } );
+
+          test( "should not call _runTimer() when empty date or time values", () => {
+            element.type = "date";
+            element._start();
+
+            assert.isFalse( element._runTimer.calledOnce );
+          } );
+        } );
+
+        suite( "_stop", () => {
+          setup( () => {
+            sandbox.stub( element, "_processCount" );
+          } );
+
+          test( "should cancel the timer", () => {
+            element.type = "down";
+            element.date = "2019-10-29";
+            element.refresh = 60;
+            element._start();
+
+            clock.tick(30000);
+
+            assert.isTrue( element._refreshDebounceJob.isActive() );
+
+            element._stop();
+
+            clock.tick(30000);
+
+            assert.isFalse( element._processCount.called );
+            assert.isFalse( element._refreshDebounceJob.isActive() );
+          } );
+
+        } );
+
+        suite( "_handleStart", () => {
+
+          setup( () => {
+            sandbox.stub( element, "_start" );
+          } );
+
+          test( "should call _start() when this is the initial 'start'", () => {
+            const event = new CustomEvent( "start" );
+            element.dispatchEvent( event );
+
+            assert.isTrue( element._start.calledOnce );
+            assert.isFalse( element._initialStart, "_initialStart set to false" );
+          } );
+
+          test( "should not call _start() when this is not the initial start", () => {
+            element._initialStart = false;
+
+            const event = new CustomEvent( "start" );
+            element.dispatchEvent( event );
+
+            assert.isFalse( element._start.called );
+          } );
+
+        } );
 
       });
     </script>
