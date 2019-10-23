@@ -17,9 +17,9 @@
       "thresholds": {
         "global": {
           "branches": 85,
-          "lines": 92,
-          "functions": 92,
-          "statements": 92
+          "lines": 95,
+          "functions": 95,
+          "statements": 95
         }
       }
     }
