@@ -72,12 +72,25 @@ export default class RiseDataCounter extends RiseElement {
     return "data-counter-reset";
   }
 
+  static get TYPE_DOWN() {
+    return "down";
+  }
+
+  static get TYPE_UP() {
+    return "up";
+  }
+
+  static get MOMENT_UNITS() {
+    return ["years", "months", "weeks", "days", "hours", "minutes", "seconds", "milliseconds"];
+  }
+
   constructor() {
     super();
 
     this._setVersion( version );
     this._initialStart = true;
     this._refreshDebounceJob = null;
+    this._dateDuration = null;
   }
 
   ready() {
@@ -95,7 +108,7 @@ export default class RiseDataCounter extends RiseElement {
   }
 
   _isValidType( type ) {
-    return type === "up" || type === "down";
+    return type === RiseDataCounter.TYPE_UP || type === RiseDataCounter.TYPE_DOWN;
   }
 
   _isValidDate( date ) {
@@ -132,12 +145,14 @@ export default class RiseDataCounter extends RiseElement {
       return;
     }
 
+    this.date && this._initializeDateDuration( this.date, this.type );
+
     this._runTimer( this.refresh );
   }
 
   _stop() {
     this._refreshDebounceJob && this._refreshDebounceJob.cancel();
-    // TODO: clear things
+    this._dateDuration = null;
   }
 
   _sendCounterEvent( eventName, detail ) {
@@ -154,11 +169,64 @@ export default class RiseDataCounter extends RiseElement {
     }
   }
 
+  _initializeDateDuration( targetDate, type ) {
+    const targetDateInMS = moment( targetDate, "YYYY-MM-DD" ).valueOf(),
+      currentDateInMS = moment().valueOf(),
+      calculation = type === RiseDataCounter.TYPE_DOWN ? targetDateInMS - currentDateInMS : currentDateInMS - targetDateInMS;
+
+    this._dateDuration = moment.duration(calculation, "milliseconds");
+  }
+
+  _updateDateDuration( intervalMS, type ) {
+    const calculation = type === RiseDataCounter.TYPE_DOWN ? this._dateDuration - intervalMS : this._dateDuration + intervalMS;
+
+    this._dateDuration = moment.duration(calculation, "milliseconds");
+  }
+
+  _getDateDurationFormatted() {
+    return RiseDataCounter.MOMENT_UNITS.reduce( (duration, unit) => {
+      duration[ unit ] = this._dateDuration[unit]();
+      return duration;
+    }, {});
+  }
+
+  _getDateDifferenceFormatted( targetDate, type ) {
+    const now = moment(),
+      event = moment( targetDate, "YYYY-MM-DD" );
+
+    function getValue( unit ) {
+      return type === RiseDataCounter.TYPE_DOWN ? event.diff( now, unit ) : now.diff( event, unit );
+    }
+
+    return RiseDataCounter.MOMENT_UNITS.reduce( (difference, unit) => {
+      difference[ unit ] = getValue( unit );
+      return difference;
+    }, {});
+  }
+
+  _getDateData() {
+    const data = { targetDate: this.date, type: `count ${this.type}` };
+
+    this._updateDateDuration( this.refresh * 1000, this.type );
+
+    data.difference = this._getDateDifferenceFormatted( this.date, this.type );
+    data.duration = this._getDateDurationFormatted();
+
+    return data;
+  }
+
+  _getTimeData() {
+    // TODO
+    return {};
+  }
+
   _processCount() {
-    // TODO: get difference as timestamp based on type and date or time
-    // TODO: format object for event
-    // temporarily send current timestamp (ISO)
-    this._sendCounterEvent( RiseDataCounter.EVENT_DATA_UPDATE, new Date().toISOString() );
+    const data = {};
+
+    data.date = this.date ? this._getDateData() : null;
+    data.time = !this.date && this.time ? this._getTimeData() : null;
+
+    this._sendCounterEvent( RiseDataCounter.EVENT_DATA_UPDATE, data );
     this._runTimer( this.refresh );
   }
 

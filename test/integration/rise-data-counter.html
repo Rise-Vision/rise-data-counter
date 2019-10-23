@@ -64,7 +64,13 @@
       suite( "data event", () => {
         test( "should receive data events per refresh", ( done ) => {
           const handler = function( evt ) {
-            assert.isString( evt.detail );
+            assert.isObject( evt.detail );
+            assert.isObject( evt.detail.date );
+            assert.isNull( evt.detail.time );
+            assert.equal( evt.detail.date.targetDate, "2019-10-29" );
+            assert.equal( evt.detail.date.type, "count down" );
+            assert.isObject( evt.detail.date.duration );
+            assert.isObject( evt.detail.date.difference );
 
             dataCount += 1;
 
@@ -92,7 +98,13 @@
 
         test( "should reset from date change", ( done ) => {
           const handler = function( evt ) {
-            assert.isString( evt.detail );
+            assert.isObject( evt.detail );
+            assert.isObject( evt.detail.date );
+            assert.isNull( evt.detail.time );
+            assert.equal( evt.detail.date.targetDate, "2020-01-01" );
+            assert.equal( evt.detail.date.type, "count down" );
+            assert.isObject( evt.detail.date.duration );
+            assert.isObject( evt.detail.date.difference );
 
             done();
           };
@@ -108,7 +120,11 @@
 
         test( "should call reset from time change", ( done ) => {
           const handler = function( evt ) {
-            assert.isString( evt.detail );
+            assert.isObject( evt.detail );
+            assert.isNull( evt.detail.date );
+            assert.isObject( evt.detail.time );
+
+            // TODO: other assertions once time data formatting is complete
 
             done();
           };
@@ -124,7 +140,11 @@
 
         test( "should call reset from completion change", ( done ) => {
           const handler = function( evt ) {
-            assert.isString( evt.detail );
+            assert.isObject( evt.detail );
+            assert.isNull( evt.detail.date );
+            assert.isObject( evt.detail.time );
+
+            // TODO: other assertions once completion message is handled
 
             done();
           };
