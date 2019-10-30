@@ -176,7 +176,7 @@ export default class RiseDataCounter extends RiseElement {
   }
 
   _formatMomentJSMonth( month ) {
-    if ( !month || isNaN( month ) || month < 0 || month > 12) {
+    if ( !month || isNaN( month ) || month < 0 || month > 11) {
       return "";
     }
 
