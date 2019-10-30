@@ -123,8 +123,10 @@
             assert.isObject( evt.detail );
             assert.isNull( evt.detail.date );
             assert.isObject( evt.detail.time );
-
-            // TODO: other assertions once time data formatting is complete
+            assert.equal( evt.detail.time.targetTime, "20:00" );
+            assert.equal( evt.detail.time.type, "count down" );
+            assert.isObject( evt.detail.time.duration );
+            assert.isObject( evt.detail.time.difference );
 
             done();
           };

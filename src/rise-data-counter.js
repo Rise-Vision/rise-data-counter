@@ -80,8 +80,12 @@ export default class RiseDataCounter extends RiseElement {
     return "up";
   }
 
-  static get MOMENT_UNITS() {
+  static get MOMENT_DATE_UNITS() {
     return ["years", "months", "weeks", "days", "hours", "minutes", "seconds", "milliseconds"];
+  }
+
+  static get MOMENT_TIME_UNITS() {
+    return ["hours", "minutes", "seconds", "milliseconds"];
   }
 
   constructor() {
@@ -91,6 +95,7 @@ export default class RiseDataCounter extends RiseElement {
     this._initialStart = true;
     this._refreshDebounceJob = null;
     this._dateDuration = null;
+    this._timeDuration = null;
   }
 
   ready() {
@@ -146,6 +151,7 @@ export default class RiseDataCounter extends RiseElement {
     }
 
     this.date && this._initializeDateDuration( this.date, this.type );
+    !this.date && this.time && this._initializeTimeDuration( this.time, this.type );
 
     this._runTimer( this.refresh );
   }
@@ -169,6 +175,21 @@ export default class RiseDataCounter extends RiseElement {
     }
   }
 
+  _formatMomentJSMonth( month ) {
+    if ( !month || isNaN( month ) || month < 0 || month > 11) {
+      return "";
+    }
+
+    // momentjs month is zero indexed based
+    month += 1;
+
+    if ( month < 10 ) {
+      return `0${ month }`
+    }
+
+    return month;
+  }
+
   _initializeDateDuration( targetDate, type ) {
     const targetDateInMS = moment( targetDate, "YYYY-MM-DD" ).valueOf(),
       currentDateInMS = moment().valueOf(),
@@ -177,15 +198,38 @@ export default class RiseDataCounter extends RiseElement {
     this._dateDuration = moment.duration(calculation, "milliseconds");
   }
 
+  _initializeTimeDuration( targetTime, type ) {
+    const current = moment(),
+      target = moment( `${ current.year() }-${ this._formatMomentJSMonth( current.month() ) }-${current.date()}T${ targetTime }`, "YYYY-MM-DDTHH:mm" ),
+      targetTimeInMS = target.valueOf(),
+      currentTimeInMS = current.valueOf(),
+      calculation = type === RiseDataCounter.TYPE_DOWN ? targetTimeInMS - currentTimeInMS : currentTimeInMS - targetTimeInMS;
+
+    this._timeDuration = moment.duration(calculation, "milliseconds");
+  }
+
   _updateDateDuration( intervalMS, type ) {
     const calculation = type === RiseDataCounter.TYPE_DOWN ? this._dateDuration - intervalMS : this._dateDuration + intervalMS;
 
     this._dateDuration = moment.duration(calculation, "milliseconds");
   }
 
+  _updateTimeDuration( intervalMS, type ) {
+    const calculation = type === RiseDataCounter.TYPE_DOWN ? this._timeDuration - intervalMS : this._timeDuration + intervalMS;
+
+    this._timeDuration = moment.duration(calculation, "milliseconds");
+  }
+
   _getDateDurationFormatted() {
-    return RiseDataCounter.MOMENT_UNITS.reduce( (duration, unit) => {
+    return RiseDataCounter.MOMENT_DATE_UNITS.reduce( (duration, unit) => {
       duration[ unit ] = this._dateDuration[unit]();
+      return duration;
+    }, {});
+  }
+
+  _getTimeDurationFormatted() {
+    return RiseDataCounter.MOMENT_TIME_UNITS.reduce( (duration, unit) => {
+      duration[ unit ] = this._timeDuration[unit]();
       return duration;
     }, {});
   }
@@ -198,7 +242,21 @@ export default class RiseDataCounter extends RiseElement {
       return type === RiseDataCounter.TYPE_DOWN ? event.diff( now, unit ) : now.diff( event, unit );
     }
 
-    return RiseDataCounter.MOMENT_UNITS.reduce( (difference, unit) => {
+    return RiseDataCounter.MOMENT_DATE_UNITS.reduce( (difference, unit) => {
+      difference[ unit ] = getValue( unit );
+      return difference;
+    }, {});
+  }
+
+  _getTimeDifferenceFormatted( targetTime, type ) {
+    const now = moment(),
+      event = moment( `${ now.year() }-${ this._formatMomentJSMonth( now.month() ) }-${now.date()}T${ targetTime }`, "YYYY-MM-DDTHH:mm" );
+
+    function getValue( unit ) {
+      return type === RiseDataCounter.TYPE_DOWN ? event.diff( now, unit ) : now.diff( event, unit );
+    }
+
+    return RiseDataCounter.MOMENT_TIME_UNITS.reduce( (difference, unit) => {
       difference[ unit ] = getValue( unit );
       return difference;
     }, {});
@@ -216,8 +274,14 @@ export default class RiseDataCounter extends RiseElement {
   }
 
   _getTimeData() {
-    // TODO
-    return {};
+    const data = { targetTime: this.time, type: `count ${this.type}` };
+
+    this._updateTimeDuration( this.refresh * 1000, this.type );
+
+    data.difference = this._getTimeDifferenceFormatted( this.time, this.type );
+    data.duration = this._getTimeDurationFormatted();
+
+    return data;
   }
 
   _processCount() {
