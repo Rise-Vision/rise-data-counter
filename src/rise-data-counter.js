@@ -1,6 +1,5 @@
 /* eslint-disable no-console */
 
-import { html } from "@polymer/polymer";
 import { RiseElement } from "rise-common-component/src/rise-element.js";
 import { timeOut } from "@polymer/polymer/lib/utils/async.js";
 import { Debouncer } from "@polymer/polymer/lib/utils/debounce.js";
@@ -8,11 +7,6 @@ import moment from "moment";
 import { version } from "./rise-data-counter-version.js";
 
 export default class RiseDataCounter extends RiseElement {
-
-  static get template() {
-    // TODO: this is temporary for skeleton
-    return html`<h1>RISE DATA COUNTER</h1>`;
-  }
 
   static get properties() {
     return {
