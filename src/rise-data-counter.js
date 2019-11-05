@@ -1,4 +1,4 @@
-/* eslint-disable no-console */
+/* eslint-disable no-console, no-unused-vars */
 
 import { RiseElement } from "rise-common-component/src/rise-element.js";
 import { timeOut } from "@polymer/polymer/lib/utils/async.js";
@@ -256,6 +256,31 @@ export default class RiseDataCounter extends RiseElement {
     }, {});
   }
 
+  _isOutOfRange( units ) {
+    for ( let [ key, value] of Object.entries( units ) ) {
+      if (value < 0) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  _getStatus( type, units ) {
+    const data = {};
+
+    if ( type === "down" ) {
+      data.completed = this._isOutOfRange( units );
+      data.completion = this.completion;
+    }
+
+    if ( type === "up" ) {
+      data.started = !this._isOutOfRange( units );
+    }
+
+    return data;
+  }
+
   _getDateData() {
     const data = { targetDate: this.date, type: `count ${this.type}` };
 
@@ -264,7 +289,9 @@ export default class RiseDataCounter extends RiseElement {
     data.difference = this._getDateDifferenceFormatted( this.date, this.type );
     data.duration = this._getDateDurationFormatted();
 
-    return data;
+    const rangeData = this._getStatus( this.type, data.difference );
+
+    return Object.assign( {}, data, rangeData );
   }
 
   _getTimeData() {
@@ -275,7 +302,9 @@ export default class RiseDataCounter extends RiseElement {
     data.difference = this._getTimeDifferenceFormatted( this.time, this.type );
     data.duration = this._getTimeDurationFormatted();
 
-    return data;
+    const rangeData = this._getStatus( this.type, data.difference );
+
+    return Object.assign( data, rangeData );
   }
 
   _processCount() {
