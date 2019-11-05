@@ -526,6 +526,8 @@
             assert.deepEqual( data, {
               targetDate: "2019-10-29",
               type: "count down",
+              completed: false,
+              completion: undefined,
               duration: {
                 days: 27,
                 hours: 23,
@@ -570,6 +572,8 @@
               date: {
                 targetDate: "2019-10-29",
                 type: "count down",
+                completed: false,
+                completion: undefined,
                 duration: {
                   days: 27,
                   hours: 23,
@@ -789,6 +793,8 @@
             assert.deepEqual( data, {
               targetTime: "17:00",
               type: "count down",
+              completed: false,
+              completion: undefined,
               duration: {
                 hours: 3,
                 milliseconds: 0,
@@ -804,6 +810,57 @@
             });
           } );
 
+        } );
+
+        suite( "_isOutOfRange", () => {
+          test( "should return true when out of range", () => {
+            assert.isTrue( element._isOutOfRange( {
+              hours: 0,
+              minutes: 0,
+              seconds: -2,
+              milliseconds: -2000
+            } ) )
+          } );
+
+          test( "should return false when within range", () => {
+            assert.isFalse( element._isOutOfRange( {
+              hours: 3,
+              minutes: 180,
+              seconds: 10800,
+              milliseconds: 10800000
+            } ) )
+          } );
+        } );
+
+        suite( "_getRangeData", () => {
+          test( "should return correct object values when type is 'down'", () => {
+            const units = {
+              hours: 3,
+              minutes: 180,
+              seconds: 10800,
+              milliseconds: 10800000
+            };
+
+            element.completion = "Testing";
+
+            assert.deepEqual( element._getRangeData( "down", units ), {
+              completed: false,
+              completion: "Testing"
+            } );
+          } );
+
+          test( "should return correct object values when type is 'up'", () => {
+            const units = {
+              hours: 3,
+              minutes: 180,
+              seconds: 10800,
+              milliseconds: 10800000
+            };
+
+            assert.deepEqual( element._getRangeData( "up", units ), {
+              started: true
+            } );
+          } );
         } );
 
       });
