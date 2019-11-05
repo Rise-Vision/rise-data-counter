@@ -832,7 +832,7 @@
           } );
         } );
 
-        suite( "_getRangeData", () => {
+        suite( "_getStatus", () => {
           test( "should return correct object values when type is 'down'", () => {
             const units = {
               hours: 3,
@@ -843,7 +843,7 @@
 
             element.completion = "Testing";
 
-            assert.deepEqual( element._getRangeData( "down", units ), {
+            assert.deepEqual( element._getStatus( "down", units ), {
               completed: false,
               completion: "Testing"
             } );
@@ -857,7 +857,7 @@
               milliseconds: 10800000
             };
 
-            assert.deepEqual( element._getRangeData( "up", units ), {
+            assert.deepEqual( element._getStatus( "up", units ), {
               started: true
             } );
           } );

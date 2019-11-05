@@ -266,7 +266,7 @@ export default class RiseDataCounter extends RiseElement {
     return false;
   }
 
-  _getRangeData( type, units ) {
+  _getStatus( type, units ) {
     const data = {};
 
     if ( type === "down" ) {
@@ -289,7 +289,7 @@ export default class RiseDataCounter extends RiseElement {
     data.difference = this._getDateDifferenceFormatted( this.date, this.type );
     data.duration = this._getDateDurationFormatted();
 
-    const rangeData = this._getRangeData( this.type, data.difference );
+    const rangeData = this._getStatus( this.type, data.difference );
 
     return Object.assign( {}, data, rangeData );
   }
@@ -302,7 +302,7 @@ export default class RiseDataCounter extends RiseElement {
     data.difference = this._getTimeDifferenceFormatted( this.time, this.type );
     data.duration = this._getTimeDurationFormatted();
 
-    const rangeData = this._getRangeData( this.type, data.difference );
+    const rangeData = this._getStatus( this.type, data.difference );
 
     return Object.assign( data, rangeData );
   }
