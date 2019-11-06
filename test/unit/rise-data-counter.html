@@ -265,19 +265,74 @@
             assert.isTrue( element._initializeDateDuration.calledWith( element.date ) );
           } );
 
-          test( "should not call _runTimer() when type is invalid", () => {
+          test( "should not call _runTimer() and should send data-error event when type is invalid", ( done ) => {
+            const listener = ( evt ) => {
+              assert.deepEqual( evt.detail, {
+                message: "Invalid type, valid values are 'down' and 'up'",
+                type: "test"
+              } );
+
+              assert.isFalse( element._runTimer.calledOnce );
+
+              element.removeEventListener( "data-error", listener );
+              done();
+            };
+
+            element.addEventListener( "data-error", listener );
             element.type = "test";
             element.date = "2019-10-29";
             element._start();
 
-            assert.isFalse( element._runTimer.calledOnce );
           } );
 
-          test( "should not call _runTimer() when empty date or time values", () => {
-            element.type = "date";
+          test( "should not call _runTimer() or send data-error event when empty date or time values", () => {
+            sinon.spy( element, "_sendCounterEvent" );
+
+            element.type = "down";
             element._start();
 
             assert.isFalse( element._runTimer.calledOnce );
+            assert.isFalse( element._sendCounterEvent.calledOnce );
+          } );
+
+          test( "should not call _runTimer() and should send data-error event when date format is invalid", ( done ) => {
+            const listener = ( evt ) => {
+              assert.deepEqual( evt.detail, {
+                message: "Invalid format, valid date is YYYY-MM-DD and valid time is HH:mm",
+                date: element.date,
+                time: element.time
+              } );
+
+              assert.isFalse( element._runTimer.calledOnce );
+
+              element.removeEventListener( "data-error", listener );
+              done();
+            };
+
+            element.addEventListener( "data-error", listener );
+            element.type = "down";
+            element.date = "29-10-2019";
+            element._start();
+          } );
+
+          test( "should not call _runTimer() and should send data-error event when time format is invalid", ( done ) => {
+            const listener = ( evt ) => {
+              assert.deepEqual( evt.detail, {
+                message: "Invalid format, valid date is YYYY-MM-DD and valid time is HH:mm",
+                date: element.date,
+                time: element.time
+              } );
+
+              assert.isFalse( element._runTimer.calledOnce );
+
+              element.removeEventListener( "data-error", listener );
+              done();
+            };
+
+            element.addEventListener( "data-error", listener );
+            element.type = "down";
+            element.time = "01:43:21";
+            element._start();
           } );
         } );
 

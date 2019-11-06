@@ -135,12 +135,25 @@ export default class RiseDataCounter extends RiseElement {
 
   _start() {
     if ( !this._isValidType( this.type ) ) {
-      // TODO: log error
+      super.log( "error", "Invalid type", { type: this.type } );
+      this._sendCounterEvent( RiseDataCounter.EVENT_DATA_ERROR, {
+        message: "Invalid type, valid values are 'down' and 'up'",
+        type: this.type
+      } );
       return;
     }
 
     if ( !this._hasValidFormat() ) {
-      // TODO: only log error if date or time has a value
+      // only log error if date or time is not empty
+      if ( this.date || this.time ) {
+        super.log( "error", "Invalid format", { date: this.date, time: this.time } );
+        this._sendCounterEvent( RiseDataCounter.EVENT_DATA_ERROR, {
+          message: "Invalid format, valid date is YYYY-MM-DD and valid time is HH:mm",
+          date: this.date,
+          time: this.time
+        } );
+      }
+
       return;
     }
 

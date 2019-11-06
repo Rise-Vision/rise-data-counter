@@ -45,6 +45,10 @@
       console.log( "data-update", evt.detail );
     } );
 
+    riseDataCounter01.addEventListener( "data-error", evt => {
+      console.log( "data-error", evt.detail );
+    } );
+
     // Uncomment if testing directly in browser
     // [ riseDataCounter01 ].forEach( el => RisePlayerConfiguration.Helpers.sendStartEvent( el ) );
   }
