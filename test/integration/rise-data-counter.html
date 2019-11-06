@@ -145,8 +145,7 @@
             assert.isObject( evt.detail );
             assert.isNull( evt.detail.date );
             assert.isObject( evt.detail.time );
-
-            // TODO: other assertions once completion message is handled
+            assert.equal( evt.detail.time.completion, "Test!" );
 
             done();
           };
@@ -160,6 +159,51 @@
           clock.tick(60000);
         } );
 
+      } );
+
+      suite( "logging", () => {
+        const componentData = {
+          name: "rise-data-counter",
+          id: "",
+          version: "__VERSION__"
+        };
+
+        setup( () => {
+          sandbox.spy( RisePlayerConfiguration.Logger, "error" );
+        } );
+
+        test( "should log 'data-error' event when invalid type attribute", () => {
+          elementDate.type = "test";
+          elementDate.dispatchEvent( new CustomEvent( "start" ) );
+
+          assert.deepEqual( RisePlayerConfiguration.Logger.error.args[ 0 ][ 0 ], componentData );
+          assert.equal( RisePlayerConfiguration.Logger.error.args[ 0 ][ 1 ], "Invalid type");
+          assert.deepEqual( RisePlayerConfiguration.Logger.error.args[ 0 ][ 2 ], { type: "test" } );
+
+          elementDate.type = "down";
+        } );
+
+        test( "should log 'data-error' event when date format invalid", () => {
+          elementDate.date = "29-10-2019";
+          elementDate.dispatchEvent( new CustomEvent( "start" ) );
+
+          assert.deepEqual( RisePlayerConfiguration.Logger.error.args[ 0 ][ 0 ], componentData );
+          assert.equal( RisePlayerConfiguration.Logger.error.args[ 0 ][ 1 ], "Invalid format");
+          assert.deepEqual( RisePlayerConfiguration.Logger.error.args[ 0 ][ 2 ], { date: "29-10-2019", time: undefined } );
+
+          elementDate.date = "2019-10-29";
+        } );
+
+        test( "should log 'data-error' event when time format invalid", () => {
+          elementTime.time = "17:00:35";
+          elementTime.dispatchEvent( new CustomEvent( "start" ) );
+
+          assert.deepEqual( RisePlayerConfiguration.Logger.error.args[ 0 ][ 0 ], componentData );
+          assert.equal( RisePlayerConfiguration.Logger.error.args[ 0 ][ 1 ], "Invalid format");
+          assert.deepEqual( RisePlayerConfiguration.Logger.error.args[ 0 ][ 2 ], { date: undefined, time: "17:00:35" } );
+
+          elementTime.time = "17:00";
+        } );
       } );
     });
   </script>
