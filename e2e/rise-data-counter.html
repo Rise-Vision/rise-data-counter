@@ -29,17 +29,49 @@
       }
     }
   </script>
+  <style>
+    .counterContainer {
+      background-color: lightblue;
+      border: solid 1px black;
+      width: 90vw;
+      height: 90vh;
+      margin: auto;
+      text-align: center;
+      font-size: 200px;
+      font-weight: bold;
+    }
+  </style>
 </head>
 <body>
-<rise-data-counter id="rise-data-counter-01">
+<rise-data-counter id="rise-data-counter-01" label="Count Down" type="down" date="2050-01-01">
 </rise-data-counter>
+
+<div id="counterData" class="counterContainer" style="display: none"></div>
 
 <script>
   function configureComponents() {
+    const riseDataCounter = document.querySelector('#rise-data-counter-01');
+    const counterData = document.querySelector('#counterData');
+
+    riseDataCounter.addEventListener( 'data-update', data => {
+      var dateDiff = data.detail.date.difference;
+
+      if (dateDiff.days > 0) {
+        counterData.innerHTML = 'Valid counter';
+        counterData.style.display = 'block';
+      }
+    });
+
+    riseDataCounter.addEventListener( 'data-error', err => {
+      console.log('Error received', err);
+      counterData.innerHTML = '';
+      counterData.style.display = 'none';
+    });
+
     console.log('Rise components ready');
   }
 
-  window.addEventListener( "rise-components-ready", configureComponents );
+  window.addEventListener( 'rise-components-ready', configureComponents );
 </script>
 <script>
   RisePlayerConfiguration.configure();
