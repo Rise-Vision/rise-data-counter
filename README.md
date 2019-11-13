@@ -49,11 +49,24 @@ The component listens for the following events:
 
 The **data-update** event provides an object with a `details` property, containing `date` and `time` properties. Each of these contain the following fields:
 
+- type: The type of the counter, `down` or `up`.
 - duration: The absolute difference of all the units. If `1` hour and `20` minutes are remaining, then `hours=1` and `minutes=20`.
 - difference: The absolute difference of each of the units. If `1` hour and `20` minutes are remaining, then `hours=1` and `minutes=80`.
 
-For `date`, both `duration` and `difference` contain: `years`, `months`, `weeks`, `days`, `hours`, `minutes`, `seconds`, `milliseconds`.
-For `time`, both `duration` and `difference` contain: `hours`, `minutes`, `seconds`, `milliseconds`.
+For `date`, the following properties are available:
+- Both `duration` and `difference` contain: `years`, `months`, `weeks`, `days`, `hours`, `minutes`, `seconds`, `milliseconds`.
+- The `targetDate` property indicates the date the user or designer chose for this instance.
+
+For `time`, the following properties are available:
+- Both `duration` and `difference` contain: `hours`, `minutes`, `seconds`, `milliseconds`.
+- The `targetTime` property indicates the time the user or designer chose for this instance.
+
+For type equals to `down`, the following exclusive properties will be available inside the `details` object:
+- `completed`: A boolean indicating the target date/time was reached.
+- `completion`: The completion message provided by the user or designer.
+
+For type equals to `up`, the following exclusive properties will be available inside the `details` object:
+- `started`: A boolean indicating the target date/time was reached.
 
 ### Logging
 
