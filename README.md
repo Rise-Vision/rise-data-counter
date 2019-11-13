@@ -66,7 +66,7 @@ For type equals to `down`, the following exclusive properties will be available 
 - `completion`: The completion message provided by the user or designer.
 
 For type equals to `up`, the following exclusive properties will be available inside the `details` object:
-- `started`: A boolean indicating the target date/time was reached.
+- `started`: A boolean indicating the target date/time has been reached to start counting up.
 
 ### Logging
 
