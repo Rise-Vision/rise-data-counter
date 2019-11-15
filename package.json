@@ -1,6 +1,6 @@
 {
   "name": "rise-data-counter",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Rise data counter component",
   "scripts": {
     "prebuild": "eslint .",
