@@ -160,7 +160,7 @@ export default class RiseDataCounter extends RiseElement {
     this.date && this._initializeDateDuration( this.date, this.type );
     !this.date && this.time && this._initializeTimeDuration( this.time, this.type );
 
-    this._runTimer( this.refresh );
+    this._processCount( true );
   }
 
   _stop() {
@@ -294,10 +294,10 @@ export default class RiseDataCounter extends RiseElement {
     return data;
   }
 
-  _getDateData() {
+  _getDateData( ignoreDurationUpdate = false ) {
     const data = { targetDate: this.date, type: `count ${this.type}` };
 
-    this._updateDateDuration( this.refresh * 1000, this.type );
+    !ignoreDurationUpdate && this._updateDateDuration( this.refresh * 1000, this.type );
 
     data.difference = this._getDateDifferenceFormatted( this.date, this.type );
     data.duration = this._getDateDurationFormatted();
@@ -307,10 +307,10 @@ export default class RiseDataCounter extends RiseElement {
     return Object.assign( {}, data, rangeData );
   }
 
-  _getTimeData() {
+  _getTimeData( ignoreDurationUpdate = false ) {
     const data = { targetTime: this.time, type: `count ${this.type}` };
 
-    this._updateTimeDuration( this.refresh * 1000, this.type );
+    !ignoreDurationUpdate && this._updateTimeDuration( this.refresh * 1000, this.type );
 
     data.difference = this._getTimeDifferenceFormatted( this.time, this.type );
     data.duration = this._getTimeDurationFormatted();
@@ -320,11 +320,11 @@ export default class RiseDataCounter extends RiseElement {
     return Object.assign( data, rangeData );
   }
 
-  _processCount() {
+  _processCount( start = false ) {
     const data = {};
 
-    data.date = this.date ? this._getDateData() : null;
-    data.time = !this.date && this.time ? this._getTimeData() : null;
+    data.date = this.date ? this._getDateData( start ) : null;
+    data.time = !this.date && this.time ? this._getTimeData( start ) : null;
 
     this._sendCounterEvent( RiseDataCounter.EVENT_DATA_UPDATE, data );
     this._runTimer( this.refresh );

@@ -62,6 +62,23 @@
       });
 
       suite( "data event", () => {
+        test( "should receive data event immediately after component starts", (done) => {
+          const handler = function( evt ) {
+            assert.isObject( evt.detail );
+            assert.isObject( evt.detail.date );
+            assert.isNull( evt.detail.time );
+            assert.equal( evt.detail.date.targetDate, "2019-10-29" );
+            assert.equal( evt.detail.date.type, "count down" );
+            assert.isObject( evt.detail.date.duration );
+            assert.isObject( evt.detail.date.difference );
+
+            done();
+          };
+
+          elementDate.addEventListener( "data-update", handler );
+          elementDate.dispatchEvent( new CustomEvent( "start" ) );
+        } );
+
         test( "should receive data events per refresh", ( done ) => {
           const handler = function( evt ) {
             assert.isObject( evt.detail );
@@ -109,12 +126,12 @@
             done();
           };
 
-          elementDate.addEventListener( "data-update", handler );
           elementDate.dispatchEvent( new CustomEvent( "start" ) );
-
           elementDate.setAttribute( "date", "2020-01-01" );
 
           assert.isTrue( elementDate._reset.calledOnce );
+
+          elementDate.addEventListener( "data-update", handler );
           clock.tick(60000);
         } );
 
@@ -131,12 +148,12 @@
             done();
           };
 
-          elementTime.addEventListener( "data-update", handler );
           elementTime.dispatchEvent( new CustomEvent( "start" ) );
-
           elementTime.setAttribute( "time", "20:00" );
 
           assert.isTrue( elementTime._reset.calledOnce );
+
+          elementTime.addEventListener( "data-update", handler );
           clock.tick(60000);
         } );
 
@@ -150,12 +167,12 @@
             done();
           };
 
-          elementTime.addEventListener( "data-update", handler );
           elementTime.dispatchEvent( new CustomEvent( "start" ) );
-
           elementTime.setAttribute( "completion", "Test!" );
 
           assert.isTrue( elementTime._reset.calledOnce );
+
+          elementTime.addEventListener( "data-update", handler );
           clock.tick(60000);
         } );
 
