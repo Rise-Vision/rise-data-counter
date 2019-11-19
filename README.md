@@ -29,6 +29,7 @@ This component receives the following list of attributes:
 - **time**: (string / optional): The time value to count up from or down to. Valid format is `HH:mm`.
 - **completion**: (string / optional): The message to display when the countdown is complete. Only used for a type configuration of `down`.
 - **refresh**: (number / optional): The rate at which the component should provide a new timestamp value. Unit is seconds and it defaults to `1`.
+- **non-completion**: ( empty /optional ): If present, it indicates the `completion` attribute should not be surfaced as editable to the user in Template Editor. This allows a `completion` value to be set on the instance of the component and it will persist. 
 - **non-editable**: ( empty / optional ): If present, it indicates this component is not available for customization in the Template Editor.
 
 This component does not support PUD; it will need to be handled by Designers on a per Template basis.
