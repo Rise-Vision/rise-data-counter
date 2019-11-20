@@ -57,10 +57,12 @@ The **data-update** event provides an object with a `details` property, containi
 For `date`, the following properties are available:
 - Both `duration` and `difference` contain: `years`, `months`, `weeks`, `days`, `hours`, `minutes`, `seconds`, `milliseconds`.
 - The `targetDate` property indicates the date the user or designer chose for this instance.
+- The `targetTime` property indicates the time the user or designer chose to combine with the date they chose. If no time was configured, this value will be `undefined`.
 
 For `time`, the following properties are available:
 - Both `duration` and `difference` contain: `hours`, `minutes`, `seconds`, `milliseconds`.
 - The `targetTime` property indicates the time the user or designer chose for this instance.
+- **Note** - `time` will have data populated if no date was configured on the instance. If both date and time were configured on the instance, then the data will be populated in the `date` object and `time` will be `null`.   
 
 For type equals to `down`, the following exclusive properties will be available inside the `details` object:
 - `completed`: A boolean indicating the target date/time was reached.

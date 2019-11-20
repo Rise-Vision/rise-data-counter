@@ -123,13 +123,16 @@ export default class RiseDataCounter extends RiseElement {
       return false;
     }
 
-    if ( this.date ) {
-      // default on using date value if for some reason time is also provided
+    if ( this.time && !this.date ) {
+      return this._isValidTime( this.time );
+    }
+
+    if ( this.date && !this.time ) {
       return this._isValidDate( this.date );
     }
 
-    if ( this.time ) {
-      return this._isValidTime( this.time );
+    if ( this.date && this.time ) {
+      return this._isValidDate( this.date ) && this._isValidTime( this.time );
     }
   }
 
@@ -157,7 +160,7 @@ export default class RiseDataCounter extends RiseElement {
       return;
     }
 
-    this.date && this._initializeDateDuration( this.date, this.type );
+    this.date && this._initializeDateDuration( this.date, this.time, this.type );
     !this.date && this.time && this._initializeTimeDuration( this.time, this.type );
 
     this._processCount( true );
@@ -197,8 +200,8 @@ export default class RiseDataCounter extends RiseElement {
     return month;
   }
 
-  _initializeDateDuration( targetDate, type ) {
-    const targetDateInMS = moment( targetDate, "YYYY-MM-DD" ).valueOf(),
+  _initializeDateDuration( targetDate, targetTime, type ) {
+    const targetDateInMS = targetTime ? moment( `${targetDate}T${targetTime}`, "YYYY-MM-DDTHH:mm" ).valueOf() : moment( targetDate, "YYYY-MM-DD" ).valueOf(),
       currentDateInMS = moment().valueOf(),
       calculation = type === RiseDataCounter.TYPE_DOWN ? targetDateInMS - currentDateInMS : currentDateInMS - targetDateInMS;
 
@@ -241,9 +244,9 @@ export default class RiseDataCounter extends RiseElement {
     }, {});
   }
 
-  _getDateDifferenceFormatted( targetDate, type ) {
+  _getDateDifferenceFormatted( targetDate, targetTime, type ) {
     const now = moment(),
-      event = moment( targetDate, "YYYY-MM-DD" );
+      event = targetTime ? moment( `${targetDate}T${targetTime}`, "YYYY-MM-DDTHH:mm" ) : moment( targetDate, "YYYY-MM-DD" );
 
     function getValue( unit ) {
       return type === RiseDataCounter.TYPE_DOWN ? event.diff( now, unit ) : now.diff( event, unit );
@@ -295,11 +298,11 @@ export default class RiseDataCounter extends RiseElement {
   }
 
   _getDateData( ignoreDurationUpdate = false ) {
-    const data = { targetDate: this.date, type: `count ${this.type}` };
+    const data = { targetDate: this.date, targetTime: this.time || "00:00", type: `count ${this.type}` };
 
     !ignoreDurationUpdate && this._updateDateDuration( this.refresh * 1000, this.type );
 
-    data.difference = this._getDateDifferenceFormatted( this.date, this.type );
+    data.difference = this._getDateDifferenceFormatted( this.date, this.time, this.type );
     data.duration = this._getDateDurationFormatted();
 
     const rangeData = this._getStatus( this.type, data.difference );

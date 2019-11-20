@@ -174,6 +174,22 @@
             assert.isTrue( element._hasValidFormat() );
           } );
 
+          test( "should return true if 'date' and 'time' configured with valid format", () => {
+            element.date= "2020-03-03";
+            element.time = "16:20";
+            assert.isTrue( element._hasValidFormat() );
+          } );
+
+          test( "should return false if either 'date' or 'time' configured with invalid format", () => {
+            element.date= "03-03-2020";
+            element.time = "16:20";
+            assert.isFalse( element._hasValidFormat() );
+
+            element.date= "2020-03-03";
+            element.time = "16-20";
+            assert.isFalse( element._hasValidFormat() );
+          } );
+
         } );
 
         suite( "_sendCounterEvent", () => {
@@ -399,7 +415,7 @@
             // test a date that is before target date to count down to
             clock = sinon.useFakeTimers({now: moment("2019-10-01", "YYYY-MM-DD").valueOf()});
 
-            element._initializeDateDuration( "2019-10-29", "down" );
+            element._initializeDateDuration( "2019-10-29", undefined, "down" );
 
             assert.equal( element._dateDuration.asMilliseconds(), 2419200000 );
             assert.equal( element._dateDuration.asDays(), 28 );
@@ -407,7 +423,7 @@
             // test a date that is same as target date to count down to
             clock = sinon.useFakeTimers({now: moment("2019-10-29", "YYYY-MM-DD").valueOf()});
 
-            element._initializeDateDuration( "2019-10-29", "down" );
+            element._initializeDateDuration( "2019-10-29", undefined, "down" );
 
             assert.equal( element._dateDuration.asMilliseconds(), 0 );
             assert.equal( element._dateDuration.asDays(), 0 );
@@ -415,7 +431,7 @@
             // test a date that has passed target date to count down to
             clock = sinon.useFakeTimers({now: moment("2019-11-01", "YYYY-MM-DD").valueOf()});
 
-            element._initializeDateDuration( "2019-10-29", "down" );
+            element._initializeDateDuration( "2019-10-29", undefined, "down" );
 
             assert.equal( element._dateDuration.asMilliseconds(), -259200000 );
             assert.equal( element._dateDuration.asDays(), -3 );
@@ -426,7 +442,7 @@
             // test a date that is after target date to start from
             clock = sinon.useFakeTimers({now: moment("2019-10-29", "YYYY-MM-DD").valueOf()});
 
-            element._initializeDateDuration( "2019-10-01", "up" );
+            element._initializeDateDuration( "2019-10-01", undefined, "up" );
 
             assert.equal( element._dateDuration.asMilliseconds(), 2419200000 );
             assert.equal( element._dateDuration.asDays(), 28 );
@@ -434,7 +450,7 @@
             // test a date that is same as target date to start from
             clock = sinon.useFakeTimers({now: moment("2019-10-29", "YYYY-MM-DD").valueOf()});
 
-            element._initializeDateDuration( "2019-10-29", "up" );
+            element._initializeDateDuration( "2019-10-29", undefined, "up" );
 
             assert.equal( element._dateDuration.asMilliseconds(), 0 );
             assert.equal( element._dateDuration.asDays(), 0 );
@@ -442,10 +458,40 @@
             // test a date that is before target date to start from
             clock = sinon.useFakeTimers({now: moment("2019-10-01", "YYYY-MM-DD").valueOf()});
 
-            element._initializeDateDuration( "2019-10-29", "up" );
+            element._initializeDateDuration( "2019-10-29", undefined, "up" );
 
             assert.equal( element._dateDuration.asMilliseconds(), -2419200000 );
             assert.equal( element._dateDuration.asDays(), -28 );
+
+          } );
+
+          test( "should initialize correct duration with given target date AND time", () => {
+            // test a date that is before target date and time to count down to
+            clock = sinon.useFakeTimers({now: moment("2019-10-01T17:20", "YYYY-MM-DDTHH:mm").valueOf()});
+
+            element._initializeDateDuration( "2019-10-29", "08:00", "down" );
+
+            assert.equal( element._dateDuration.days(), 27 );
+            assert.equal( element._dateDuration.hours(), 14 );
+            assert.equal( element._dateDuration.minutes(), 40 );
+
+            // test a date and time that is same as target date and time to count down to
+            clock = sinon.useFakeTimers({now: moment("2019-10-29T08:00", "YYYY-MM-DDTHH:mm").valueOf()});
+
+            element._initializeDateDuration( "2019-10-29", "08:00", "down" );
+
+            assert.equal( element._dateDuration.days(), 0 );
+            assert.equal( element._dateDuration.hours(), 0 );
+            assert.equal( element._dateDuration.minutes(), 0 );
+
+            // test a date and time that has passed target date and time to count down to
+            clock = sinon.useFakeTimers({now: moment("2019-11-01T14:30", "YYYY-MM-DDTHH:mm").valueOf()});
+
+            element._initializeDateDuration( "2019-10-29", "08:00", "down" );
+
+            assert.equal( element._dateDuration.days(), -3 );
+            assert.equal( element._dateDuration.hours(), -6 );
+            assert.equal( element._dateDuration.minutes(), -30 );
 
           } );
         } );
@@ -455,7 +501,7 @@
             // test a date that is before target date to count down to
             clock = sinon.useFakeTimers({now: moment("2019-10-01", "YYYY-MM-DD").valueOf()});
 
-            element._initializeDateDuration( "2019-10-29", "down" );
+            element._initializeDateDuration( "2019-10-29", undefined, "down" );
 
             assert.equal( element._dateDuration.days(), 28 );
 
@@ -478,7 +524,7 @@
             // test a date that is before target date to count down to
             clock = sinon.useFakeTimers({now: moment("2019-10-29", "YYYY-MM-DD").valueOf()});
 
-            element._initializeDateDuration( "2019-10-01", "up" );
+            element._initializeDateDuration( "2019-10-01", undefined, "up" );
 
             assert.equal( element._dateDuration.days(), 28 );
 
@@ -503,7 +549,7 @@
             // test a date that is before target date to count down to
             clock = sinon.useFakeTimers({now: moment("2019-10-01", "YYYY-MM-DD").valueOf()});
 
-            element._initializeDateDuration( "2019-10-29", "down" );
+            element._initializeDateDuration( "2019-10-29", undefined, "down" );
 
             // simulate a 10 second interval
             element._updateDateDuration( 10 * 1000, "down" );
@@ -528,12 +574,12 @@
             // test a date that is before target date to count down to
             clock = sinon.useFakeTimers({now: moment("2019-10-01", "YYYY-MM-DD").valueOf()});
 
-            element._initializeDateDuration( "2019-10-29", "down" );
+            element._initializeDateDuration( "2019-10-29", undefined, "down" );
 
             // simulate a 10 second interval
             element._updateDateDuration( 10 * 1000, "down" );
 
-            const formatted = element._getDateDifferenceFormatted( "2019-10-29", "down" );
+            const formatted = element._getDateDifferenceFormatted( "2019-10-29", undefined, "down" );
 
             assert.deepEqual( formatted, {
               days: 28,
@@ -547,16 +593,39 @@
             } )
           } );
 
+          test( "should return object with all correct properties and values from a date AND time", () => {
+            // test a date and time that is before target date and time to count down to
+            clock = sinon.useFakeTimers({now: moment("2019-10-01T06:15", "YYYY-MM-DDTHH:mm").valueOf()});
+
+            element._initializeDateDuration( "2019-10-29", "11:30", "down" );
+
+            // simulate a 10 second interval
+            element._updateDateDuration( 10 * 1000, "down" );
+
+            const formatted = element._getDateDifferenceFormatted( "2019-10-29", "11:30", "down" );
+
+            assert.deepEqual( formatted, {
+              days: 28,
+              hours: 677,
+              milliseconds: 2438100000,
+              minutes: 40635,
+              months: 0,
+              seconds: 2438100,
+              weeks: 4,
+              years: 0
+            } )
+          } );
+
           test( "should return object with all correct properties and values based on 'up' type", () => {
             // test a date that is before target date to count down to
             clock = sinon.useFakeTimers({now: moment("2019-10-29", "YYYY-MM-DD").valueOf()});
 
-            element._initializeDateDuration( "2019-10-01", "up" );
+            element._initializeDateDuration( "2019-10-01", undefined, "up" );
 
             // simulate a 10 second interval
             element._updateDateDuration( 10 * 1000, "up" );
 
-            const formatted = element._getDateDifferenceFormatted( "2019-10-01", "up" );
+            const formatted = element._getDateDifferenceFormatted( "2019-10-01", undefined, "up" );
 
             assert.deepEqual( formatted, {
               days: 28,
@@ -565,6 +634,29 @@
               minutes: 40320,
               months: 0,
               seconds: 2419200,
+              weeks: 4,
+              years: 0
+            } )
+          } );
+
+          test( "should return object with all correct properties and values from a date AND time", () => {
+            // test a date that is before target date to count down to
+            clock = sinon.useFakeTimers({now: moment("2019-10-29T13:00", "YYYY-MM-DDTHH:mm").valueOf()});
+
+            element._initializeDateDuration( "2019-10-01", "08:45", "up" );
+
+            // simulate a 10 second interval
+            element._updateDateDuration( 10 * 1000, "up" );
+
+            const formatted = element._getDateDifferenceFormatted( "2019-10-01", "08:45", "up" );
+
+            assert.deepEqual( formatted, {
+              days: 28,
+              hours: 676,
+              milliseconds: 2434500000,
+              minutes: 40575,
+              months: 0,
+              seconds: 2434500,
               weeks: 4,
               years: 0
             } )
@@ -602,6 +694,7 @@
 
             assert.deepEqual( data, {
               targetDate: "2019-10-29",
+              targetTime: "00:00",
               type: "count down",
               completed: false,
               completion: undefined,
@@ -623,6 +716,48 @@
                 months: 0,
                 seconds: 2419200,
                 weeks: 4,
+                years: 0
+              }
+            });
+          } );
+
+          test( "should return object with all correct properties and values when date AND time configured", () => {
+            // test a date and time that is before target date to count down to
+            clock = sinon.useFakeTimers({now: moment("2019-10-01T21:30", "YYYY-MM-DDTHH:mm").valueOf()});
+
+            element.date = "2019-10-29";
+            element.time = "13:00";
+            element.type = "down";
+            element.refresh = 10;
+
+            element._start();
+
+            const data = element._getDateData();
+
+            assert.deepEqual( data, {
+              targetDate: "2019-10-29",
+              targetTime: "13:00",
+              type: "count down",
+              completed: false,
+              completion: undefined,
+              duration: {
+                days: 27,
+                hours: 15,
+                milliseconds: 0,
+                minutes: 29,
+                months: 0,
+                seconds: 50,
+                weeks: 3,
+                years: 0
+              },
+              difference: {
+                days: 27,
+                hours: 663,
+                milliseconds: 2388600000,
+                minutes: 39810,
+                months: 0,
+                seconds: 2388600,
+                weeks: 3,
                 years: 0
               }
             });
@@ -650,6 +785,7 @@
             assert.deepEqual( element._sendCounterEvent.args[1][1], {
               date: {
                 targetDate: "2019-10-29",
+                targetTime: "00:00",
                 type: "count down",
                 completed: false,
                 completion: undefined,

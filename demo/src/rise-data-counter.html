@@ -30,6 +30,11 @@
     }
   </script>
   <style>
+
+    #completion {
+      display:none;
+    }
+
     .counterItemsContainer {
       background-color: lightblue;
       border: solid 1px black;
@@ -62,7 +67,11 @@
 
 <body>
 
-<div class="counterItemsContainer">
+<div class="counterItemsContainer" id="completion">
+  <p id="message"></p>
+</div>
+
+<div class="counterItemsContainer" id="output">
   <div id="counter-hrs-1"></div>
   <div id="counter-hrs-2"></div>
   <div>:</div>
@@ -84,6 +93,13 @@
       var duration = evt.detail.date.duration;
 
       console.log( "data-update", evt.detail );
+
+      if ( evt.detail.date && evt.detail.date.completed ) {
+        document.querySelector('#output').style.display = "none";
+        document.querySelector('#completion').style.display = "block";
+        document.querySelector('#message').innerHTML = evt.detail.date.completion;
+        return;
+      }
 
       document.querySelector('#counter-hrs-1').innerHTML = Math.floor(duration.hours / 10);
       document.querySelector('#counter-hrs-2').innerHTML = duration.hours % 10;
