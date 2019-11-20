@@ -29,11 +29,50 @@
       }
     }
   </script>
+  <style>
+    .counterItemsContainer {
+      background-color: lightblue;
+      border: solid 1px black;
+      font-size: 2em;
+      width: 90%;
+      height: 90%;
+      padding-left: 20px;
+      padding-bottom: 10px;
+      margin-left: auto;
+      margin-right: auto;
+      margin-top: 80px;
+      overflow: hidden;
+    }
+
+    .counterItemsContainer > div {
+      width: 150px;
+      height: 500px;
+      float: left;
+      padding-top: 200px;
+      font-size: 36px;
+      font-weight: bold;
+      overflow: hidden;
+    }
+
+    .counterItemsContainer > div:nth-child(1) {
+      margin-left: 150px;
+    }
+  </style>
 </head>
 
 <body>
 
-<rise-data-counter id="rise-data-counter-01" type="down" refresh="10" date="2020-01-01" completion="I'm done!">
+<div class="counterItemsContainer">
+  <div id="counter-hrs-1"></div>
+  <div id="counter-hrs-2"></div>
+  <div>:</div>
+  <div id="counter-min-1"></div>
+  <div id="counter-min-2"></div>
+  <div>:</div>
+  <div id="counter-snd-1"></div>
+  <div id="counter-snd-2"></div>
+</div>
+<rise-data-counter id="rise-data-counter-01" type="down" refresh="1" date="2020-01-01" completion="I'm done!">
 </rise-data-counter>
 
 <script>
@@ -42,7 +81,16 @@
     console.log('Rise components ready');
 
     riseDataCounter01.addEventListener( "data-update", evt => {
+      var duration = evt.detail.date.duration;
+
       console.log( "data-update", evt.detail );
+
+      document.querySelector('#counter-hrs-1').innerHTML = Math.floor(duration.hours / 10);
+      document.querySelector('#counter-hrs-2').innerHTML = duration.hours % 10;
+      document.querySelector('#counter-min-1').innerHTML = Math.floor(duration.minutes / 10);
+      document.querySelector('#counter-min-2').innerHTML = duration.minutes % 10;
+      document.querySelector('#counter-snd-1').innerHTML = Math.floor(duration.seconds / 10);
+      document.querySelector('#counter-snd-2').innerHTML = duration.seconds % 10;
     } );
 
     riseDataCounter01.addEventListener( "data-error", evt => {
