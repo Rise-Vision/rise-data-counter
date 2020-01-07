@@ -827,6 +827,7 @@
           } );
 
           test( "should return month correctly formatted", () => {
+            assert.equal( element._formatMomentJSMonth( 0 ), "01" );
             assert.equal( element._formatMomentJSMonth( 2 ), "03" );
             assert.equal( element._formatMomentJSMonth( 9 ), "10" );
             assert.equal( element._formatMomentJSMonth( 11 ), "12" );
@@ -969,6 +970,25 @@
               milliseconds: 12600000,
               minutes: 210,
               seconds: 12600,
+            } )
+          } );
+
+          test( "should return object with all correct properties and values based on 'down' type when month is Januart", () => {
+            // test a time that is before target time to count down to
+            clock = sinon.useFakeTimers({now: moment("2019-10-01T15:45", "YYYY-MM-DDTHH:mm").valueOf()});
+
+            element._initializeTimeDuration( "17:00", "down" );
+
+            // simulate a 10 second interval
+            element._updateTimeDuration( 10 * 1000, "down" );
+
+            const formatted = element._getTimeDifferenceFormatted( "17:00", "down" );
+
+            assert.deepEqual( formatted, {
+              hours: 1,
+              milliseconds: 4500000,
+              minutes: 75,
+              seconds: 4500,
             } )
           } );
 
