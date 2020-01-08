@@ -135,6 +135,30 @@ A demo project showing how to implement a simple HH:mm:ss counter can be found i
 
 Another option is using `example-counter-component` as the scaffolding for a new template. This project can be found in https://github.com/Rise-Vision/html-template-library
 
+### Integration in a Template
+
+After creating the Template's structure in `html-template-library`, add a reference to the component in the `<head>` section of `template.html`:
+
+```
+<script src="https://widgets.risevision.com/stable/components/rise-data-counter/1/rise-data-counter.js"></script>
+```
+
+Add an instance of the component, as shown in the example:
+
+```
+  <rise-data-counter
+      id="rise-data-counter-01" label="Count Down" type="down" date="2050-01-01" refresh="60">
+  </rise-data-counter>
+```
+
+To test the template in a browser outside Player/Apps, add the following lines (replacing with the appropriate element id):
+
+```
+const riseDataCounter01 = document.querySelector('#rise-data-counter-01');
+
+RisePlayerConfiguration.Helpers.sendStartEvent( riseDataCounter01 );
+```
+
 ## Submitting Issues
 If you encounter problems or find defects we really want to hear about them. If you could take the time to add them as issues to this Repository it would be most appreciated. When reporting issues, please use the following format where applicable:
 
