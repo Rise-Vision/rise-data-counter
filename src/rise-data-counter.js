@@ -54,14 +54,6 @@ export default class RiseDataCounter extends RiseElement {
   }
 
   // Event name constants
-  static get EVENT_DATA_UPDATE() {
-    return "data-update";
-  }
-
-  static get EVENT_DATA_ERROR() {
-    return "data-error";
-  }
-
   static get EVENT_RESET() {
     return "data-counter-reset";
   }
