@@ -1,22 +1,148 @@
+[Example Rise Data Counter](https://github.com/Rise-Vision/html-template-library/tree/master/example-counter-component).
 # Rise Data Counter [![CircleCI](https://circleci.com/gh/Rise-Vision/rise-data-counter/tree/master.svg?style=svg)](https://circleci.com/gh/Rise-Vision/rise-data-counter/tree/master) [![Coverage Status](https://coveralls.io/repos/github/Rise-Vision/rise-data-counter/badge.svg?branch=master)](https://coveralls.io/github/Rise-Vision/rise-data-counter?branch=master)
 
 ## Introduction
 
 `rise-data-counter` is a Polymer 3 Web Component that provides time based events relative to a target or start date.
 
-## Usage
+## Usage For Designers
 
 The below illustrates simple usage of the component.
 
-#### Example
+### Integration in a Template
 
+A complete setup of the component can be found [here](https://github.com/Rise-Vision/html-template-library/tree/master/example-counter-component).
+#### HTML
 ```
   <rise-data-counter
-      id="rise-data-counter-01" label="Count Down" type="down" date="2050-01-01" refresh="60">
+      id="rise-data-counter-01" label="Countdown" type="down" date="2050-01-01" refresh="60">
   </rise-data-counter>
 ```
+Since this is not a visual component, a listener needs to be registered to process the data it provides. You can check the available events in the [events section](#events).
+#### Javascript
+```
+function configureComponents() {
+  _configureCounter();
 
-Since this is not a visual component, a listener needs to be registered to process the data it provides. You can check the available events in the [events section](#events)
+  console.log( "Rise components ready" );
+}
+
+function _configureCounter() {
+  //declare counter component
+  const riseDataCounter = document.querySelector('#rise-data-counter-01');
+  //Counter container
+  const daysLabel = document.querySelector('#number');
+  const daysContainer = document.querySelector('.container--number');
+  //Completion message
+  const messageContainer = document.querySelector('.container--reveal');
+
+  riseDataCounter.addEventListener( "data-update", data => {
+    //If user declares a sepcific date
+    if ( data.detail.date ) {
+
+      daysContainer.style.display = 'block';
+
+
+    if (!data.detail.date.completed) {
+
+      messageContainer.style.display = 'none';
+
+      //Date with Days, Hours and Minutes
+
+      if ( data.detail.date.difference.days != 0 ) {
+
+        daysLabel.style.display = 'flex';
+        daysLabel.innerHTML = data.detail.date.difference.days + `<span class="type-word">DAYS</span>`;
+
+      } 
+
+      //Date with hours and minutes 
+
+      if ( (data.detail.date.duration.hours != 0) && (data.detail.date.difference.days == 0) ) {
+
+        daysLabel.style.display = 'flex';
+        daysLabel.innerHTML = data.detail.date.duration.hours + `<span class="type-word">HOURS</span>`;
+
+      } 
+
+      //Date with minutes
+      if ( (data.detail.date.duration.minutes != 0 ) && (data.detail.date.duration.hours == 0) && (data.detail.date.difference.days == 0)) {
+
+        daysLabel.style.display = 'flex';
+        daysLabel.innerHTML = data.detail.date.duration.minutes + `<span class="type-word">MINUTES</span>`;
+
+      } 
+      //if no time left
+      if((data.detail.date.duration.minutes == 0 ) && (data.detail.date.duration.hours == 0) && (data.detail.date.difference.days == 0)) {
+
+        daysLabel.style.display = 'none';
+
+      }
+
+    }
+
+  //COMPLETED MESSAGE
+    else {
+
+      daysLabel.style.display = 'none';
+      daysContainer.style.display = 'none';
+      messageContainer.innerHTML = data.detail.date.completion;
+      messageContainer.style.display = 'block';
+
+    }
+  }
+  
+  //If user delcares a time everyday.
+  //Time with hours, minute and seconds
+  else if (data.detail.time) {
+
+       if (!data.detail.time.completed) {
+        daysLabel.style.display = 'flex';
+        daysContainer.style.display = 'block';
+        messageContainer.style.display = 'none';
+        if(data.detail.time.difference.minutes >= 60){
+          if(data.detail.time.difference.hours == 1 ){
+            daysLabel.innerHTML = data.detail.time.difference.hours + ('<span class="type-word"> HOUR</span>');
+          }else{
+            daysLabel.innerHTML = data.detail.time.difference.hours + ('<span class="type-word"> HOURS</span>');
+          }
+        }else{
+          if(data.detail.time.difference.minutes == 1 ){
+            daysLabel.innerHTML = data.detail.time.difference.minutes + ('<span class="type-word"> MINUTE</span>');
+          }else{
+            daysLabel.innerHTML = data.detail.time.difference.minutes + ('<span class="type-word"> MINUTES</span>');
+          }
+        }
+
+
+       } else {
+
+        daysLabel.style.display = 'none';
+      daysContainer.style.display = 'none';
+      messageContainer.style.display = 'block';
+      console.log('Time Config Complete');
+
+       }
+    }
+  });
+
+  riseDataCounter.addEventListener( "data-error", err => {
+    console.log('Error received', err);
+  });
+
+  //check if this is needed in production?
+  RisePlayerConfiguration.Helpers.sendStartEvent( riseDataCounter );
+}
+```
+#### PACKAGE JSON
+No dependency links.
+
+#### Build and Test Locally in Browser 
+Uncomment counter helper.
+
+### Label & Help Text
+- **Label**:Countdown or Count Up
+- **Help Text**:None
 
 ### Attributes
 
@@ -31,8 +157,6 @@ This component receives the following list of attributes:
 - **refresh**: (number / optional): The rate at which the component should provide a new timestamp value. Unit is seconds and it defaults to `1`.
 - **non-completion**: ( empty /optional ): If present, it indicates the `completion` attribute should not be surfaced as editable to the user in Template Editor. This allows a `completion` value to be set on the instance of the component and it will persist. 
 - **non-editable**: ( empty / optional ): If present, it indicates this component is not available for customization in the Template Editor.
-
-This component does not support PUD; it will need to be handled by Designers on a per Template basis.
 
 ### Events
 
@@ -70,6 +194,9 @@ For type equals to `down`, the following exclusive properties will be available 
 
 For type equals to `up`, the following exclusive properties will be available inside the `details` object:
 - `started`: A boolean indicating the target date/time has been reached to start counting up.
+
+### Play Until Done
+This component does not support PUD; it will need to be handled by Designers on a per Template basis.
 
 ### Logging
 
