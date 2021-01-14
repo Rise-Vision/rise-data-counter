@@ -262,7 +262,6 @@
         suite( "_start", () => {
           setup( () => {
             sandbox.stub( element, "_processCount" );
-            sandbox.stub( element, "_initializeDateDuration" );
           } );
 
           test( "should call _processCount() when type and date or time formats are valid", () => {
@@ -270,15 +269,7 @@
             element.date = "2019-10-29";
             element._start();
 
-            assert.isTrue( element._processCount.calledWith( true ) );
-          } );
-
-          test( "should call _initializeDateDuration() when configured for valid date", () => {
-            element.type = "down";
-            element.date = "2019-10-29";
-            element._start();
-
-            assert.isTrue( element._initializeDateDuration.calledWith( element.date ) );
+            assert.isTrue( element._processCount.called );
           } );
 
           test( "should not call _processCount() and should send data-error event when type is invalid", ( done ) => {
@@ -372,7 +363,6 @@
             clock.tick(30000);
 
             assert.isTrue( element._refreshDebounceJob.isActive() );
-            assert.isNotNull( element._dateDuration );
 
             element._stop();
 
@@ -380,7 +370,6 @@
 
             assert.isTrue( element._processCount.calledOnce );
             assert.isFalse( element._refreshDebounceJob.isActive() );
-            assert.isNull( element._dateDuration );
           } );
 
         } );
@@ -410,151 +399,15 @@
 
         } );
 
-        suite( "_initializeDateDuration", () => {
-          test( "should initialize correct duration with given target date based on 'down' type", () => {
-            // test a date that is before target date to count down to
-            clock = sinon.useFakeTimers({now: moment("2019-10-01", "YYYY-MM-DD").valueOf()});
-
-            element._initializeDateDuration( "2019-10-29", undefined, "down" );
-
-            assert.equal( element._dateDuration.asMilliseconds(), 2419200000 );
-            assert.equal( element._dateDuration.asDays(), 28 );
-
-            // test a date that is same as target date to count down to
-            clock = sinon.useFakeTimers({now: moment("2019-10-29", "YYYY-MM-DD").valueOf()});
-
-            element._initializeDateDuration( "2019-10-29", undefined, "down" );
-
-            assert.equal( element._dateDuration.asMilliseconds(), 0 );
-            assert.equal( element._dateDuration.asDays(), 0 );
-
-            // test a date that has passed target date to count down to
-            clock = sinon.useFakeTimers({now: moment("2019-11-01", "YYYY-MM-DD").valueOf()});
-
-            element._initializeDateDuration( "2019-10-29", undefined, "down" );
-
-            assert.equal( element._dateDuration.asMilliseconds(), -259200000 );
-            assert.equal( element._dateDuration.asDays(), -3 );
-
-          } );
-
-          test( "should initialize correct duration with given target date based on 'up' type", () => {
-            // test a date that is after target date to start from
-            clock = sinon.useFakeTimers({now: moment("2019-10-29", "YYYY-MM-DD").valueOf()});
-
-            element._initializeDateDuration( "2019-10-01", undefined, "up" );
-
-            assert.equal( element._dateDuration.asMilliseconds(), 2419200000 );
-            assert.equal( element._dateDuration.asDays(), 28 );
-
-            // test a date that is same as target date to start from
-            clock = sinon.useFakeTimers({now: moment("2019-10-29", "YYYY-MM-DD").valueOf()});
-
-            element._initializeDateDuration( "2019-10-29", undefined, "up" );
-
-            assert.equal( element._dateDuration.asMilliseconds(), 0 );
-            assert.equal( element._dateDuration.asDays(), 0 );
-
-            // test a date that is before target date to start from
-            clock = sinon.useFakeTimers({now: moment("2019-10-01", "YYYY-MM-DD").valueOf()});
-
-            element._initializeDateDuration( "2019-10-29", undefined, "up" );
-
-            assert.equal( element._dateDuration.asMilliseconds(), -2419200000 );
-            assert.equal( element._dateDuration.asDays(), -28 );
-
-          } );
-
-          test( "should initialize correct duration with given target date AND time", () => {
-            // test a date that is before target date and time to count down to
-            clock = sinon.useFakeTimers({now: moment("2019-10-01T17:20", "YYYY-MM-DDTHH:mm").valueOf()});
-
-            element._initializeDateDuration( "2019-10-29", "08:00", "down" );
-
-            assert.equal( element._dateDuration.days(), 27 );
-            assert.equal( element._dateDuration.hours(), 14 );
-            assert.equal( element._dateDuration.minutes(), 40 );
-
-            // test a date and time that is same as target date and time to count down to
-            clock = sinon.useFakeTimers({now: moment("2019-10-29T08:00", "YYYY-MM-DDTHH:mm").valueOf()});
-
-            element._initializeDateDuration( "2019-10-29", "08:00", "down" );
-
-            assert.equal( element._dateDuration.days(), 0 );
-            assert.equal( element._dateDuration.hours(), 0 );
-            assert.equal( element._dateDuration.minutes(), 0 );
-
-            // test a date and time that has passed target date and time to count down to
-            clock = sinon.useFakeTimers({now: moment("2019-11-01T14:30", "YYYY-MM-DDTHH:mm").valueOf()});
-
-            element._initializeDateDuration( "2019-10-29", "08:00", "down" );
-
-            assert.equal( element._dateDuration.days(), -3 );
-            assert.equal( element._dateDuration.hours(), -6 );
-            assert.equal( element._dateDuration.minutes(), -30 );
-
-          } );
-        } );
-
-        suite( "_updateDateDuration", () => {
-          test( "should update correct duration with given interval (MS) and based on 'down' type", () => {
-            // test a date that is before target date to count down to
-            clock = sinon.useFakeTimers({now: moment("2019-10-01", "YYYY-MM-DD").valueOf()});
-
-            element._initializeDateDuration( "2019-10-29", undefined, "down" );
-
-            assert.equal( element._dateDuration.days(), 28 );
-
-            // simulate a 24 hour interval
-            element._updateDateDuration( 24 * 60 * 60 * 1000, "down" );
-
-            assert.equal( element._dateDuration.days(), 27 );
-
-            // simulate a 10 second interval
-            element._updateDateDuration( 10 * 1000, "down" );
-
-            assert.equal( element._dateDuration.seconds(), 50 );
-
-            element._updateDateDuration( 10 * 1000, "down" );
-
-            assert.equal( element._dateDuration.seconds(), 40 );
-          } );
-
-          test( "should update correct duration with given interval (MS) and based on 'up' type", () => {
-            // test a date that is before target date to count down to
-            clock = sinon.useFakeTimers({now: moment("2019-10-29", "YYYY-MM-DD").valueOf()});
-
-            element._initializeDateDuration( "2019-10-01", undefined, "up" );
-
-            assert.equal( element._dateDuration.days(), 28 );
-
-            // simulate a 24 hour interval
-            element._updateDateDuration( 24 * 60 * 60 * 1000, "up" );
-
-            assert.equal( element._dateDuration.days(), 29 );
-
-            // simulate a 10 second interval
-            element._updateDateDuration( 10 * 1000, "up" );
-
-            assert.equal( element._dateDuration.seconds(), 10 );
-
-            element._updateDateDuration( 10 * 1000, "up" );
-
-            assert.equal( element._dateDuration.seconds(), 20 );
-          } );
-        } );
-
         suite( "_getDateDurationFormatted", () => {
-          test( "should return object with all correct properties and values", () => {
+          test( "should return object with all correct properties and values with given target date based on 'down' type", () => {
             // test a date that is before target date to count down to
             clock = sinon.useFakeTimers({now: moment("2019-10-01", "YYYY-MM-DD").valueOf()});
 
-            element._initializeDateDuration( "2019-10-29", undefined, "down" );
-
             // simulate a 10 second interval
-            element._updateDateDuration( 10 * 1000, "down" );
+            clock.tick(10000);
 
-            const formatted = element._getDateDurationFormatted();
+            let formatted = element._getDateDurationFormatted( "2019-10-29", undefined, "down" );
 
             assert.deepEqual( formatted, {
               days: 27,
@@ -565,7 +418,139 @@
               seconds: 50,
               weeks: 3,
               years: 0
-            } )
+            } );
+
+            // test a date that is same as target date to count down to
+            clock = sinon.useFakeTimers({now: moment("2019-10-29", "YYYY-MM-DD").valueOf()});
+
+            formatted = element._getDateDurationFormatted( "2019-10-29", undefined, "down" );
+
+            assert.deepEqual( formatted, {
+              days: 0,
+              hours: 0,
+              milliseconds: 0,
+              minutes: 0,
+              months: 0,
+              seconds: 0,
+              weeks: 0,
+              years: 0
+            } );
+
+            // test a date that has passed target date to count down to
+            clock = sinon.useFakeTimers({now: moment("2019-11-01", "YYYY-MM-DD").valueOf()});
+
+            formatted = element._getDateDurationFormatted( "2019-10-29", undefined, "down" );
+
+            assert.deepEqual( formatted, {
+              days: -3,
+              hours: -0,
+              milliseconds: -0,
+              minutes: -0,
+              months: 0,
+              seconds: -0,
+              weeks: 0,
+              years: 0
+            } );
+          } );
+
+          test( "should return object with all correct properties and values with given target date based on 'up' type", () => {
+            // test a date that is after target date to start from
+            clock = sinon.useFakeTimers({now: moment("2019-10-29", "YYYY-MM-DD").valueOf()});
+
+            let formatted = element._getDateDurationFormatted( "2019-10-01", undefined, "up" );
+
+            assert.deepEqual( formatted, {
+              days: 28,
+              hours: 0,
+              milliseconds: 0,
+              minutes: 0,
+              months: 0,
+              seconds: 0,
+              weeks: 4,
+              years: 0
+            } );
+
+            // test a date that is same as target date to start from
+            clock = sinon.useFakeTimers({now: moment("2019-10-29", "YYYY-MM-DD").valueOf()});
+
+            formatted = element._getDateDurationFormatted( "2019-10-29", undefined, "up" );
+
+            assert.deepEqual( formatted, {
+              days: 0,
+              hours: 0,
+              milliseconds: 0,
+              minutes: 0,
+              months: 0,
+              seconds: 0,
+              weeks: 0,
+              years: 0
+            } );
+
+            // test a date that is before target date to start from
+            clock = sinon.useFakeTimers({now: moment("2019-10-01", "YYYY-MM-DD").valueOf()});
+
+            formatted = element._getDateDurationFormatted( "2019-10-29", undefined, "up" );
+
+            assert.deepEqual( formatted, {
+              days: -28,
+              hours: -0,
+              milliseconds: -0,
+              minutes: -0,
+              months: 0,
+              seconds: -0,
+              weeks: -4,
+              years: 0
+            } );
+          } );
+
+          test( "should return object with all correct properties and values with given target date AND time", () => {
+            // test a date that is before target date and time to count down to
+            clock = sinon.useFakeTimers({now: moment("2019-10-01T17:20", "YYYY-MM-DDTHH:mm").valueOf()});
+
+            let formatted = element._getDateDurationFormatted( "2019-10-29", "08:00", "down" );
+
+            assert.deepEqual( formatted, {
+              days: 27,
+              hours: 14,
+              milliseconds: 0,
+              minutes: 40,
+              months: 0,
+              seconds: 0,
+              weeks: 3,
+              years: 0
+            } );
+
+            // test a date and time that is same as target date and time to count down to
+            clock = sinon.useFakeTimers({now: moment("2019-10-29T08:00", "YYYY-MM-DDTHH:mm").valueOf()});
+
+            formatted = element._getDateDurationFormatted( "2019-10-29", "08:00", "down" );
+
+            assert.deepEqual( formatted, {
+              days: 0,
+              hours: 0,
+              milliseconds: 0,
+              minutes: 0,
+              months: 0,
+              seconds: 0,
+              weeks: 0,
+              years: 0
+            } );
+
+            // test a date and time that has passed target date and time to count down to
+            clock = sinon.useFakeTimers({now: moment("2019-11-01T14:30", "YYYY-MM-DDTHH:mm").valueOf()});
+
+            formatted = element._getDateDurationFormatted( "2019-10-29", "08:00", "down" );
+
+            assert.deepEqual( formatted, {
+              days: -3,
+              hours: -6,
+              milliseconds: -0,
+              minutes: -30,
+              months: 0,
+              seconds: -0,
+              weeks: 0,
+              years: 0
+            } );
           } );
         } );
 
@@ -573,11 +558,6 @@
           test( "should return object with all correct properties and values based on 'down' type", () => {
             // test a date that is before target date to count down to
             clock = sinon.useFakeTimers({now: moment("2019-10-01", "YYYY-MM-DD").valueOf()});
-
-            element._initializeDateDuration( "2019-10-29", undefined, "down" );
-
-            // simulate a 10 second interval
-            element._updateDateDuration( 10 * 1000, "down" );
 
             const formatted = element._getDateDifferenceFormatted( "2019-10-29", undefined, "down" );
 
@@ -597,11 +577,6 @@
             // test a date and time that is before target date and time to count down to
             clock = sinon.useFakeTimers({now: moment("2019-10-01T06:15", "YYYY-MM-DDTHH:mm").valueOf()});
 
-            element._initializeDateDuration( "2019-10-29", "11:30", "down" );
-
-            // simulate a 10 second interval
-            element._updateDateDuration( 10 * 1000, "down" );
-
             const formatted = element._getDateDifferenceFormatted( "2019-10-29", "11:30", "down" );
 
             assert.deepEqual( formatted, {
@@ -619,11 +594,6 @@
           test( "should return object with all correct properties and values based on 'up' type", () => {
             // test a date that is before target date to count down to
             clock = sinon.useFakeTimers({now: moment("2019-10-29", "YYYY-MM-DD").valueOf()});
-
-            element._initializeDateDuration( "2019-10-01", undefined, "up" );
-
-            // simulate a 10 second interval
-            element._updateDateDuration( 10 * 1000, "up" );
 
             const formatted = element._getDateDifferenceFormatted( "2019-10-01", undefined, "up" );
 
@@ -643,11 +613,6 @@
             // test a date that is before target date to count down to
             clock = sinon.useFakeTimers({now: moment("2019-10-29T13:00", "YYYY-MM-DDTHH:mm").valueOf()});
 
-            element._initializeDateDuration( "2019-10-01", "08:45", "up" );
-
-            // simulate a 10 second interval
-            element._updateDateDuration( 10 * 1000, "up" );
-
             const formatted = element._getDateDifferenceFormatted( "2019-10-01", "08:45", "up" );
 
             assert.deepEqual( formatted, {
@@ -664,22 +629,6 @@
         } );
 
         suite( "_getDateData", () => {
-          test( "should ignore updating date duration when truthy param value provided", () => {
-            sinon.spy(element, "_updateDateDuration");
-
-            // test a date that is before target date to count down to
-            clock = sinon.useFakeTimers({now: moment("2019-10-01", "YYYY-MM-DD").valueOf()});
-
-            element.date = "2019-10-29";
-            element.type = "down";
-            element.refresh = 10;
-
-            element._start();
-            element._getDateData( true );
-
-            assert.isFalse( element._updateDateDuration.called );
-          } );
-
           test( "should return object with all correct properties and values", () => {
             // test a date that is before target date to count down to
             clock = sinon.useFakeTimers({now: moment("2019-10-01", "YYYY-MM-DD").valueOf()});
@@ -699,13 +648,13 @@
               completed: false,
               completion: undefined,
               duration: {
-                days: 27,
-                hours: 23,
+                days: 28,
+                hours: 0,
                 milliseconds: 0,
-                minutes: 59,
+                minutes: 0,
                 months: 0,
-                seconds: 50,
-                weeks: 3,
+                seconds: 0,
+                weeks: 4,
                 years: 0
               },
               difference: {
@@ -744,9 +693,9 @@
                 days: 27,
                 hours: 15,
                 milliseconds: 0,
-                minutes: 29,
+                minutes: 30,
                 months: 0,
-                seconds: 50,
+                seconds: 0,
                 weeks: 3,
                 years: 0
               },
@@ -777,12 +726,11 @@
             element.type = "down";
             element.refresh = 10;
 
-            element._start();
             element._processCount();
 
             // test 2nd call since _processCount() is also called from _start()
-            assert.equal( element._sendCounterEvent.args[1][0], "data-update" );
-            assert.deepEqual( element._sendCounterEvent.args[1][1], {
+            assert.equal( element._sendCounterEvent.args[0][0], "data-update" );
+            assert.deepEqual( element._sendCounterEvent.args[0][1], {
               date: {
                 targetDate: "2019-10-29",
                 targetTime: "00:00",
@@ -790,13 +738,13 @@
                 completed: false,
                 completion: undefined,
                 duration: {
-                  days: 27,
-                  hours: 23,
+                  days: 28,
+                  hours: 0,
                   milliseconds: 0,
-                  minutes: 59,
+                  minutes: 0,
                   months: 0,
-                  seconds: 50,
-                  weeks: 3,
+                  seconds: 0,
+                  weeks: 4,
                   years: 0
                 },
                 difference: {
@@ -834,122 +782,81 @@
           });
         } );
 
-        suite( "_initializeTimeDuration", () => {
-          test( "should initialize correct duration with given target time based on 'down' type", () => {
-            // test a time that is before target time to count down to
-            clock = sinon.useFakeTimers({now: moment("2019-10-01T13:30", "YYYY-MM-DDTHH:mm").valueOf()});
-
-            element._initializeTimeDuration( "17:00", "down" );
-
-            assert.equal( element._timeDuration.hours(), 3 );
-            assert.equal( element._timeDuration.minutes(), 30 );
-
-            // test a time that is same as target time to count down to
-            clock = sinon.useFakeTimers({now: moment("2019-10-01T13:30", "YYYY-MM-DDTHH:mm").valueOf()});
-
-            element._initializeTimeDuration( "13:30", "down" );
-
-            assert.equal( element._timeDuration.hours(), 0 );
-            assert.equal( element._timeDuration.minutes(), 0 );
-
-            // test a time that has passed target time to count down to
-            clock = sinon.useFakeTimers({now: moment("2019-10-01T18:45", "YYYY-MM-DDTHH:mm").valueOf()});
-
-            element._initializeTimeDuration( "17:00", "down" );
-
-            assert.equal( element._timeDuration.hours(), -1 );
-            assert.equal( element._timeDuration.minutes(), -45 );
-
-          } );
-
-          test( "should initialize correct duration with given target time based on 'up' type", () => {
-            // test a time that is after target time to start from
-            clock = sinon.useFakeTimers({now: moment("2019-10-01T13:30", "YYYY-MM-DDTHH:mm").valueOf()});
-
-            element._initializeTimeDuration( "09:00", "up" );
-
-            assert.equal( element._timeDuration.hours(), 4 );
-            assert.equal( element._timeDuration.minutes(), 30 );
-
-            // test a time that is same as target time to start from
-            clock = sinon.useFakeTimers({now: moment("2019-10-01T13:30", "YYYY-MM-DDTHH:mm").valueOf()});
-
-            element._initializeTimeDuration( "13:30", "up" );
-
-            assert.equal( element._timeDuration.hours(), 0 );
-            assert.equal( element._timeDuration.minutes(), 0 );
-
-            // test a time that is before target time to start from
-            clock = sinon.useFakeTimers({now: moment("2019-10-01T13:30", "YYYY-MM-DDTHH:mm").valueOf()});
-
-            element._initializeTimeDuration( "17:00", "up" );
-
-            assert.equal( element._timeDuration.hours(), -3 );
-            assert.equal( element._timeDuration.minutes(), -30 );
-
-          } );
-        } );
-
-        suite( "_updateTimeDuration", () => {
-          test( "should update correct duration with given interval (MS) and based on 'down' type", () => {
-            // test a time that is before target time to count down to
-            clock = sinon.useFakeTimers({now: moment("2019-10-01T13:30", "YYYY-MM-DDTHH:mm").valueOf()});
-
-            element._initializeTimeDuration( "17:00", "down" );
-
-            assert.equal( element._timeDuration.hours(), 3 );
-            assert.equal( element._timeDuration.minutes(), 30 );
-            assert.equal( element._timeDuration.seconds(), 0 );
-
-            // simulate a 10 second interval
-            element._updateTimeDuration( 10 * 1000, "down" );
-
-            assert.equal( element._timeDuration.seconds(), 50 );
-
-            element._updateTimeDuration( 10 * 1000, "down" );
-
-            assert.equal( element._timeDuration.seconds(), 40 );
-          } );
-
-          test( "should update correct duration with given interval (MS) and based on 'up' type", () => {
-            // test a time that is after target time to start from
-            clock = sinon.useFakeTimers({now: moment("2019-10-01T13:30", "YYYY-MM-DDTHH:mm").valueOf()});
-
-            element._initializeTimeDuration( "9:00", "up" );
-
-            assert.equal( element._timeDuration.hours(), 4 );
-            assert.equal( element._timeDuration.minutes(), 30 );
-            assert.equal( element._timeDuration.seconds(), 0 );
-
-            // simulate a 10 second interval
-            element._updateTimeDuration( 10 * 1000, "up" );
-
-            assert.equal( element._timeDuration.seconds(), 10 );
-
-            element._updateTimeDuration( 10 * 1000, "up" );
-
-            assert.equal( element._timeDuration.seconds(), 20 );
-          } );
-        } );
-
         suite( "_getTimeDurationFormatted", () => {
-          test( "should return object with all correct properties and values", () => {
+          test( "should return object with all correct properties and values given target time based on 'down' type", () => {
             // test a time that is before target time to count down to
             clock = sinon.useFakeTimers({now: moment("2019-10-01T13:30", "YYYY-MM-DDTHH:mm").valueOf()});
 
-            element._initializeTimeDuration( "17:00", "down" );
-
-            // simulate a 10 second interval
-            element._updateTimeDuration( 10 * 1000, "down" );
-
-            const formatted = element._getTimeDurationFormatted();
+            let formatted = element._getTimeDurationFormatted("17:00", "down");
 
             assert.deepEqual( formatted, {
               hours: 3,
               milliseconds: 0,
-              minutes: 29,
-              seconds: 50
-            } )
+              minutes: 30,
+              seconds: 0
+            } );
+
+            // test a time that is same as target time to count down to
+            clock = sinon.useFakeTimers({now: moment("2019-10-01T13:30", "YYYY-MM-DDTHH:mm").valueOf()});
+
+            formatted = element._getTimeDurationFormatted( "13:30", "down" );
+
+            assert.deepEqual( formatted, {
+              hours: 0,
+              milliseconds: 0,
+              minutes: 0,
+              seconds: 0
+            } );
+
+            // test a time that has passed target time to count down to
+            clock = sinon.useFakeTimers({now: moment("2019-10-01T18:45", "YYYY-MM-DDTHH:mm").valueOf()});
+
+            formatted = element._getTimeDurationFormatted( "17:00", "down" );
+
+            assert.deepEqual( formatted, {
+              hours: -1,
+              milliseconds: -0,
+              minutes: -45,
+              seconds: -0
+            } );
+          } );
+
+          test( "should return object with all correct properties and values given target time based on 'up' type", () => {
+            // test a time that is after target time to start from
+            clock = sinon.useFakeTimers({now: moment("2019-10-01T13:30", "YYYY-MM-DDTHH:mm").valueOf()});
+
+            let formatted = element._getTimeDurationFormatted( "09:00", "up" );
+
+            assert.deepEqual( formatted, {
+              hours: 4,
+              milliseconds: 0,
+              minutes: 30,
+              seconds: 0
+            } );
+
+            // test a time that is same as target time to start from
+            clock = sinon.useFakeTimers({now: moment("2019-10-01T13:30", "YYYY-MM-DDTHH:mm").valueOf()});
+
+            formatted = element._getTimeDurationFormatted( "13:30", "up" );
+
+            assert.deepEqual( formatted, {
+              hours: 0,
+              milliseconds: 0,
+              minutes: 0,
+              seconds: 0
+            } );
+
+            // test a time that is before target time to start from
+            clock = sinon.useFakeTimers({now: moment("2019-10-01T13:30", "YYYY-MM-DDTHH:mm").valueOf()});
+
+            formatted = element._getTimeDurationFormatted( "17:00", "up" );
+
+            assert.deepEqual( formatted, {
+              hours: -3,
+              milliseconds: -0,
+              minutes: -30,
+              seconds: -0
+            } );
           } );
         } );
 
@@ -957,11 +864,6 @@
           test( "should return object with all correct properties and values based on 'down' type", () => {
             // test a time that is before target time to count down to
             clock = sinon.useFakeTimers({now: moment("2019-10-01T13:30", "YYYY-MM-DDTHH:mm").valueOf()});
-
-            element._initializeTimeDuration( "17:00", "down" );
-
-            // simulate a 10 second interval
-            element._updateTimeDuration( 10 * 1000, "down" );
 
             const formatted = element._getTimeDifferenceFormatted( "17:00", "down" );
 
@@ -977,11 +879,6 @@
             // test a time that is before target time to count down to
             clock = sinon.useFakeTimers({now: moment("2019-10-01T15:45", "YYYY-MM-DDTHH:mm").valueOf()});
 
-            element._initializeTimeDuration( "17:00", "down" );
-
-            // simulate a 10 second interval
-            element._updateTimeDuration( 10 * 1000, "down" );
-
             const formatted = element._getTimeDifferenceFormatted( "17:00", "down" );
 
             assert.deepEqual( formatted, {
@@ -996,11 +893,6 @@
             // test a time that is after target time to start from
             clock = sinon.useFakeTimers({now: moment("2019-10-01T13:30", "YYYY-MM-DDTHH:mm").valueOf()});
 
-            element._initializeTimeDuration( "9:00", "up" );
-
-            // simulate a 10 second interval
-            element._updateTimeDuration( 10 * 1000, "up" );
-
             const formatted = element._getTimeDifferenceFormatted( "09:00", "up" );
 
             assert.deepEqual( formatted, {
@@ -1013,22 +905,6 @@
         } );
 
         suite( "_getTimeData", () => {
-          test( "should ignore updating time duration when truthy param value provided", () => {
-            sinon.spy(element, "_updateTimeDuration");
-
-            // test a time that is before target time to count down to
-            clock = sinon.useFakeTimers({now: moment("2019-10-01T13:30", "YYYY-MM-DDTHH:mm").valueOf()});
-
-            element.time = "17:00";
-            element.type = "down";
-            element.refresh = 10;
-
-            element._start();
-            element._getTimeData( true );
-
-            assert.isFalse( element._updateTimeDuration.called );
-          } );
-
           test( "should return object with all correct properties and values", () => {
             // test a time that is before target time to count down to
             clock = sinon.useFakeTimers({now: moment("2019-10-01T13:30", "YYYY-MM-DDTHH:mm").valueOf()});
@@ -1049,8 +925,8 @@
               duration: {
                 hours: 3,
                 milliseconds: 0,
-                minutes: 29,
-                seconds: 50
+                minutes: 30,
+                seconds: 0
               },
               difference: {
                 hours: 3,
