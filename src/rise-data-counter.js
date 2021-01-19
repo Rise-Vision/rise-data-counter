@@ -84,9 +84,14 @@ export default class RiseDataCounter extends RiseElement {
 
   ready() {
     super.ready();
+  }
 
-    this.addEventListener( "rise-presentation-play", () => this._reset());
-    this.addEventListener( "rise-presentation-stop", () => this._stop());
+  _handleRisePresentationPlay() {
+    this._reset();
+  }
+
+  _handleRisePresentationStop() {
+    this._stop();
   }
 
   _reset() {
@@ -128,7 +133,7 @@ export default class RiseDataCounter extends RiseElement {
 
   _start() {
     if ( !this._isValidType( this.type ) ) {
-      super.log( "error", "Invalid type", { type: this.type } );
+      super.log( RiseDataCounter.LOG_TYPE_ERROR, "Invalid type", { errorCode: "E000000042" }, { type: this.type } );
       this._sendCounterEvent( RiseDataCounter.EVENT_DATA_ERROR, {
         message: "Invalid type, valid values are 'down' and 'up'",
         type: this.type
@@ -139,7 +144,7 @@ export default class RiseDataCounter extends RiseElement {
     if ( !this._hasValidFormat() ) {
       // only log error if date or time is not empty
       if ( this.date || this.time ) {
-        super.log( "error", "Invalid format", { date: this.date, time: this.time } );
+        super.log( RiseDataCounter.LOG_TYPE_ERROR, "Invalid format", {errorCode: "E000000043"}, { date: this.date, time: this.time } );
         this._sendCounterEvent( RiseDataCounter.EVENT_DATA_ERROR, {
           message: "Invalid format, valid date is YYYY-MM-DD and valid time is HH:mm",
           date: this.date,
