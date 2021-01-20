@@ -195,7 +195,8 @@
 
           assert.deepEqual( RisePlayerConfiguration.Logger.error.args[ 0 ][ 0 ], componentData );
           assert.equal( RisePlayerConfiguration.Logger.error.args[ 0 ][ 1 ], "Invalid type");
-          assert.deepEqual( RisePlayerConfiguration.Logger.error.args[ 0 ][ 2 ], { type: "test" } );
+          assert.deepEqual( RisePlayerConfiguration.Logger.error.args[ 0 ][ 2 ], { errorCode: "E000000042" } );
+          assert.deepEqual( RisePlayerConfiguration.Logger.error.args[ 0 ][ 3 ], { type: "test" } );
 
           elementDate.type = "down";
         } );
@@ -206,7 +207,8 @@
 
           assert.deepEqual( RisePlayerConfiguration.Logger.error.args[ 0 ][ 0 ], componentData );
           assert.equal( RisePlayerConfiguration.Logger.error.args[ 0 ][ 1 ], "Invalid format");
-          assert.deepEqual( RisePlayerConfiguration.Logger.error.args[ 0 ][ 2 ], { date: "29-10-2019", time: undefined } );
+          assert.deepEqual( RisePlayerConfiguration.Logger.error.args[ 0 ][ 2 ], { errorCode: "E000000043" } );
+          assert.deepEqual( RisePlayerConfiguration.Logger.error.args[ 0 ][ 3 ], { date: "29-10-2019", time: undefined } );
 
           elementDate.date = "2019-10-29";
         } );
@@ -217,7 +219,8 @@
 
           assert.deepEqual( RisePlayerConfiguration.Logger.error.args[ 0 ][ 0 ], componentData );
           assert.equal( RisePlayerConfiguration.Logger.error.args[ 0 ][ 1 ], "Invalid format");
-          assert.deepEqual( RisePlayerConfiguration.Logger.error.args[ 0 ][ 2 ], { date: undefined, time: "17:00:35" } );
+          assert.deepEqual( RisePlayerConfiguration.Logger.error.args[ 0 ][ 2 ], { errorCode: "E000000043" } );
+          assert.deepEqual( RisePlayerConfiguration.Logger.error.args[ 0 ][ 3 ], { date: undefined, time: "17:00:35" } );
 
           elementTime.time = "17:00";
         } );
