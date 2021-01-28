@@ -8,137 +8,55 @@
 ## Usage For Designers
 
 The below illustrates simple usage of the component.
+A complete setup of the component can be found [here](https://github.com/Rise-Vision/html-template-library/tree/master/example-counter-component).
 
 ### Integration in a Template
-
-A complete setup of the component can be found [here](https://github.com/Rise-Vision/html-template-library/tree/master/example-counter-component).
 #### HTML
+Add a reference to the component in the `<head>` section of **template.html**.
+```
+<script src="https://widgets.risevision.com/stable/components/rise-data-counter/1/rise-data-counter.js"></script>
+```
+
+Add an instance of the component to `<body>` section of **template.html**.
 ```
   <rise-data-counter
       id="rise-data-counter-01" label="Countdown" type="down" date="2050-01-01" refresh="60">
   </rise-data-counter>
 ```
-Since this is not a visual component, a listener needs to be registered to process the data it provides. You can check the available events in the [events section](#events).
+
 #### Javascript
+Since this is not a visual component, a listener needs to be registered to process the data it provides. You can check the available events in the [events section](#events).
+
+Below is a simple example of how to configure the componentand to listen for the event. You will need to also add checks with javascript to handle the varied of ways the data could be formatted and or configured by the user. 
+
+A great comprehensive example is located here: 
+https://github.com/Rise-Vision/html-template-library/blob/052b3bc97baa4a35500256a16f083e0d4a968e2c/countdown-general/src/js/main.js#L53
 ```
-function configureComponents() {
-  _configureCounter();
-
-  console.log( "Rise components ready" );
-}
-
-function _configureCounter() {
-  //declare counter component
-  const riseDataCounter = document.querySelector('#rise-data-counter-01');
-  //Counter container
-  const daysLabel = document.querySelector('#number');
-  const daysContainer = document.querySelector('.container--number');
-  //Completion message
-  const messageContainer = document.querySelector('.container--reveal');
-
-  riseDataCounter.addEventListener( "data-update", data => {
-    //If user declares a sepcific date
-    if ( data.detail.date ) {
-
-      daysContainer.style.display = 'block';
-
-
-    if (!data.detail.date.completed) {
-
-      messageContainer.style.display = 'none';
-
-      //Date with Days, Hours and Minutes
-
-      if ( data.detail.date.difference.days != 0 ) {
-
-        daysLabel.style.display = 'flex';
-        daysLabel.innerHTML = data.detail.date.difference.days + `<span class="type-word">DAYS</span>`;
-
-      } 
-
-      //Date with hours and minutes 
-
-      if ( (data.detail.date.duration.hours != 0) && (data.detail.date.difference.days == 0) ) {
-
-        daysLabel.style.display = 'flex';
-        daysLabel.innerHTML = data.detail.date.duration.hours + `<span class="type-word">HOURS</span>`;
-
-      } 
-
-      //Date with minutes
-      if ( (data.detail.date.duration.minutes != 0 ) && (data.detail.date.duration.hours == 0) && (data.detail.date.difference.days == 0)) {
-
-        daysLabel.style.display = 'flex';
-        daysLabel.innerHTML = data.detail.date.duration.minutes + `<span class="type-word">MINUTES</span>`;
-
-      } 
-      //if no time left
-      if((data.detail.date.duration.minutes == 0 ) && (data.detail.date.duration.hours == 0) && (data.detail.date.difference.days == 0)) {
-
-        daysLabel.style.display = 'none';
-
-      }
-
-    }
-
-  //COMPLETED MESSAGE
-    else {
-
-      daysLabel.style.display = 'none';
-      daysContainer.style.display = 'none';
-      messageContainer.innerHTML = data.detail.date.completion;
-      messageContainer.style.display = 'block';
-
-    }
+function configureComponents {
+const counter = document.getElementById( "rise-counter-01" );
+  counter.addEventListener( "data-update", data => {
+  //add your checks here
   }
-  
-  //If user delcares a time everyday.
-  //Time with hours, minute and seconds
-  else if (data.detail.time) {
-
-       if (!data.detail.time.completed) {
-        daysLabel.style.display = 'flex';
-        daysContainer.style.display = 'block';
-        messageContainer.style.display = 'none';
-        if(data.detail.time.difference.minutes >= 60){
-          if(data.detail.time.difference.hours == 1 ){
-            daysLabel.innerHTML = data.detail.time.difference.hours + ('<span class="type-word"> HOUR</span>');
-          }else{
-            daysLabel.innerHTML = data.detail.time.difference.hours + ('<span class="type-word"> HOURS</span>');
-          }
-        }else{
-          if(data.detail.time.difference.minutes == 1 ){
-            daysLabel.innerHTML = data.detail.time.difference.minutes + ('<span class="type-word"> MINUTE</span>');
-          }else{
-            daysLabel.innerHTML = data.detail.time.difference.minutes + ('<span class="type-word"> MINUTES</span>');
-          }
-        }
-
-
-       } else {
-
-        daysLabel.style.display = 'none';
-      daysContainer.style.display = 'none';
-      messageContainer.style.display = 'block';
-      console.log('Time Config Complete');
-
-       }
-    }
-  });
-
-  riseDataCounter.addEventListener( "data-error", err => {
-    console.log('Error received', err);
-  });
-
-  //check if this is needed in production?
-  RisePlayerConfiguration.Helpers.sendStartEvent( riseDataCounter );
+//Uncomment when testing in browser
+RisePlayerConfiguration.Helpers.sendStartEvent( counter );
 }
+window.addEventListener( "rise-components-ready", configureComponents );
 ```
+
 #### PACKAGE JSON
 No dependency links.
 
-#### Build and Test Locally in Browser 
-Uncomment counter helper.
+#### Build and Test Locally in Browswer 
+Execute the following commands in Terminal and preview template.html in browser using a simple server.  example: http://localhost:8081/build/prod/src/template.html:
+
+```
+npm install
+npm install -g polymer-cli@1.9.7
+npm run build
+python -m SimpleHTTPServer 8081
+```
+For more specifics please see: HTML Template - Build and Test Locally in Browser Documentation. 
+https://docs.google.com/document/d/1_xgKe790ZuweDVg-Abj3032an6we7YLH_lQPpe-M88M/edit#bookmark=id.21c68d5f8a7c
 
 ### Label & Help Text
 - **Label**:Countdown or Count Up
@@ -198,25 +116,12 @@ For type equals to `up`, the following exclusive properties will be available in
 ### Play Until Done
 This component does not support PUD; it will need to be handled by Designers on a per Template basis.
 
-### Logging
-
-The component logs the following events to BQ:
-
-- **start received**: The component receives the start event and commences execution.
-- **Invalid type**: The component does now have a type matching either `down` or `up`.
-- **Invalid format**: The provided `date` does not match `YYYY-MM-DD` or `time` does not match `HH:mm`.
-
-### Offline play
-
-The component supports offline play out of the box.
-
+## Development
 ## Built With
 - [Polymer 3](https://www.polymer-project.org/)
 - [Polymer CLI](https://github.com/Polymer/tools/tree/master/packages/cli)
 - [WebComponents Polyfill](https://www.webcomponents.org/polyfills/)
 - [npm](https://www.npmjs.org)
-
-## Development
 
 ### Local Development Build
 Clone this repo and change into this project directory.
@@ -230,6 +135,16 @@ npm run build
 ```
 
 **Note**: If EPERM errors occur then install polymer-cli using the `--unsafe-perm` flag ( `npm install -g polymer-cli --unsafe-perm` ) and/or using sudo.
+
+### Offline play
+The component supports offline play out of the box.
+
+### Logging
+The component logs the following events to BQ:
+
+- **start received**: The component receives the start event and commences execution.
+- **Invalid type**: The component does now have a type matching either `down` or `up`.
+- **Invalid format**: The provided `date` does not match `YYYY-MM-DD` or `time` does not match `HH:mm`.
 
 ### Testing
 You can run the suite of tests either by command terminal or interactive via Chrome browser.
