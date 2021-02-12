@@ -1,22 +1,66 @@
+[Example Rise Data Counter](https://github.com/Rise-Vision/html-template-library/tree/master/example-counter-component).
 # Rise Data Counter [![CircleCI](https://circleci.com/gh/Rise-Vision/rise-data-counter/tree/master.svg?style=svg)](https://circleci.com/gh/Rise-Vision/rise-data-counter/tree/master) [![Coverage Status](https://coveralls.io/repos/github/Rise-Vision/rise-data-counter/badge.svg?branch=master)](https://coveralls.io/github/Rise-Vision/rise-data-counter?branch=master)
 
 ## Introduction
 
 `rise-data-counter` is a Polymer 3 Web Component that provides time based events relative to a target or start date.
 
-## Usage
+## Usage For Designers
 
 The below illustrates simple usage of the component.
+A complete setup of the component can be found [here](https://github.com/Rise-Vision/html-template-library/tree/master/example-counter-component).
 
-#### Example
+### Integration in a Template
+#### HTML
+Add a reference to the component in the `<head>` section of **template.html**.
+```
+<script src="https://widgets.risevision.com/stable/components/rise-data-counter/1/rise-data-counter.js"></script>
+```
 
+Add an instance of the component to `<body>` section of **template.html**.
 ```
   <rise-data-counter
-      id="rise-data-counter-01" label="Count Down" type="down" date="2050-01-01" refresh="60">
+      id="rise-data-counter-01" label="Countdown" type="down" date="2050-01-01" refresh="60">
   </rise-data-counter>
 ```
 
-Since this is not a visual component, a listener needs to be registered to process the data it provides. You can check the available events in the [events section](#events)
+#### Javascript
+Since this is not a visual component, a listener needs to be registered to process the data it provides. You can check the available events in the [events section](#events).
+
+Below is a simple example of how to configure the componentand to listen for the event. You will need to also add checks with javascript to handle the varied of ways the data could be formatted and or configured by the user. 
+
+A great comprehensive example is located here: 
+https://github.com/Rise-Vision/html-template-library/blob/052b3bc97baa4a35500256a16f083e0d4a968e2c/countdown-general/src/js/main.js#L53
+```
+function configureComponents {
+const counter = document.getElementById( "rise-counter-01" );
+  counter.addEventListener( "data-update", data => {
+  //add your checks here
+  }
+//Uncomment when testing in browser
+RisePlayerConfiguration.Helpers.sendStartEvent( counter );
+}
+window.addEventListener( "rise-components-ready", configureComponents );
+```
+
+#### PACKAGE JSON
+No dependency links.
+
+#### Build and Test Locally in Browswer 
+Execute the following commands in Terminal and preview template.html in browser using a simple server.  example: http://localhost:8081/build/prod/src/template.html:
+
+```
+npm install
+npm install -g polymer-cli@1.9.7
+npm run build
+python -m SimpleHTTPServer 8081
+```
+For more specifics please see: HTML Template - Build and Test Locally in Browser Documentation. 
+https://docs.google.com/document/d/1_xgKe790ZuweDVg-Abj3032an6we7YLH_lQPpe-M88M/edit#bookmark=id.21c68d5f8a7c
+
+### Label & Help Text
+- **Label**:Countdown or Count Up
+- **Help Text**:None
 
 ### Attributes
 
@@ -31,8 +75,6 @@ This component receives the following list of attributes:
 - **refresh**: (number / optional): The rate at which the component should provide a new timestamp value. Unit is seconds and it defaults to `1`.
 - **non-completion**: ( empty /optional ): If present, it indicates the `completion` attribute should not be surfaced as editable to the user in Template Editor. This allows a `completion` value to be set on the instance of the component and it will persist. 
 - **non-editable**: ( empty / optional ): If present, it indicates this component is not available for customization in the Template Editor.
-
-This component does not support PUD; it will need to be handled by Designers on a per Template basis.
 
 ### Events
 
@@ -71,25 +113,15 @@ For type equals to `down`, the following exclusive properties will be available 
 For type equals to `up`, the following exclusive properties will be available inside the `details` object:
 - `started`: A boolean indicating the target date/time has been reached to start counting up.
 
-### Logging
+### Play Until Done
+This component does not support PUD; it will need to be handled by Designers on a per Template basis.
 
-The component logs the following events to BQ:
-
-- **start received**: The component receives the start event and commences execution.
-- **Invalid type**: The component does now have a type matching either `down` or `up`.
-- **Invalid format**: The provided `date` does not match `YYYY-MM-DD` or `time` does not match `HH:mm`.
-
-### Offline play
-
-The component supports offline play out of the box.
-
+## Development
 ## Built With
 - [Polymer 3](https://www.polymer-project.org/)
 - [Polymer CLI](https://github.com/Polymer/tools/tree/master/packages/cli)
 - [WebComponents Polyfill](https://www.webcomponents.org/polyfills/)
 - [npm](https://www.npmjs.org)
-
-## Development
 
 ### Local Development Build
 Clone this repo and change into this project directory.
@@ -103,6 +135,16 @@ npm run build
 ```
 
 **Note**: If EPERM errors occur then install polymer-cli using the `--unsafe-perm` flag ( `npm install -g polymer-cli --unsafe-perm` ) and/or using sudo.
+
+### Offline play
+The component supports offline play out of the box.
+
+### Logging
+The component logs the following events to BQ:
+
+- **start received**: The component receives the start event and commences execution.
+- **Invalid type**: The component does now have a type matching either `down` or `up`.
+- **Invalid format**: The provided `date` does not match `YYYY-MM-DD` or `time` does not match `HH:mm`.
 
 ### Testing
 You can run the suite of tests either by command terminal or interactive via Chrome browser.
