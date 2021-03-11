@@ -16,7 +16,9 @@
 
     <script type="text/javascript">
       RisePlayerConfiguration = {
-        isConfigured: () => true
+        Helpers: {
+          getComponentAsync: () => {}
+        }
       };
     </script>
 
@@ -70,24 +72,27 @@
           let stub;
 
           setup(() => {
-            stub = sandbox.stub(window, "addEventListener");
+            stub = sandbox.stub(element, "addEventListener");
+            sandbox.stub(RisePlayerConfiguration.Helpers, "getComponentAsync");
           });
 
-          test("should listen for rise-components-ready and call init", () => {
-            RisePlayerConfiguration.isConfigured = () => false;
-            element.ready();
-
-            assert.isTrue(stub.calledWith('rise-components-ready'));
-          });
-
-          test("should call _init() if RisePlayerConfiguration is configured", () => {
-            RisePlayerConfiguration.isConfigured = () => true;
-            sandbox.stub(element, '_init');
+          test("should call _init and register handlers", () => {
+            sandbox.spy(element, '_init');
 
             element.ready();
 
             assert.isTrue(element._init.calledOnce);
-            assert.isFalse(stub.calledOnce);
+
+            assert.isTrue(stub.calledWith('start'));
+            assert.isTrue(stub.calledWith('rise-presentation-play'));
+            assert.isTrue(stub.calledWith('rise-presentation-stop'));
+          });
+
+          test("should initialize promise and send configured", () => {
+            element.ready();
+
+            assert.isTrue(RisePlayerConfiguration.Helpers.getComponentAsync.calledWith(element));
+            assert.isTrue(riseElement._sendEvent.calledWith("configured"));
           });
 
           test("should setup handlers for viewer events", () => {
